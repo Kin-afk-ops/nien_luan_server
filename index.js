@@ -9,9 +9,13 @@ const userRoute = require("./routes/user");
 
 const app = express();
 
-app.use(
-  cors({ credentials: true, origin: true, exposedHeaders: ["set-cookies"] })
-);
+const corsOptions = {
+  origin: ["http://localhost:3000"],
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+};
+
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 
 dotenv.config();

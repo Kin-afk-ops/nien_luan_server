@@ -6,6 +6,11 @@ const Users = require("../models/Users");
 // const Notification = require("../models/Notification");
 const bcrypt = require("bcryptjs");
 const { hashPassword, comparePassword } = require("../hash/hashPassword");
+const sendOTPEmail = require("../utils/sendEmail");
+
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
+};
 
 router.post("/register/find/phone", async (req, res) => {
   const checkUser = await Users.findOne({
@@ -51,22 +56,29 @@ router.post("/register/phone", async (req, res) => {
 
   const newPassword = await hashPassword(req.body.password);
 
+  const otp = generateOTP();
+  const otpHash = await hashPassword(otp, 10);
+
   if (checkUser) {
     res.status(409).json({
       message: "User already exists",
     });
   } else {
-    const newUser = new Users({
-      phone: req.body.phone,
-      email: "none",
-      password: newPassword,
-    });
+    // const newUser = new Users({
+    //   phone: req.body.phone,
+    //   email: "none",
+    //   password: newPassword,
+    // });
 
     try {
-      const saveUser = await newUser.save();
-      const { password, ...others } = saveUser._doc;
+      await sendOTPEmail(email, otp);
+      // const saveUser = await newUser.save();
+      // const { password, ...others } = saveUser._doc;
 
-      res.status(200).json(others);
+      // res.status(200).json(others);
+      res.status(200).json({
+        message: "OTP sent to email, please verify to complete signup",
+      });
     } catch (err) {
       res.status(500).json(err);
     }
@@ -79,23 +91,31 @@ router.post("/register/email", async (req, res) => {
   });
 
   const newPassword = await hashPassword(req.body.password);
+  const otp = generateOTP();
+  const otpHash = await hashPassword(otp, 10);
 
   if (checkUser) {
     res.status(409).json({
       message: "User already exists",
     });
   } else {
-    const newUser = new Users({
-      email: req.body.email,
-      phone: "none",
-      password: newPassword,
-    });
+    // const newUser = new Users({
+    //   email: req.body.email,
+    //   phone: "none",
+    //   password: newPassword,
+    // });
 
     try {
-      const saveUser = await newUser.save();
-      const { password, ...others } = saveUser._doc;
+      await sendOTPEmail(req.body.email, otp);
+      console.log(req.body.email);
 
-      res.status(200).json(others);
+      // const saveUser = await newUser.save();
+      // const { password, ...others } = saveUser._doc;
+
+      // res.status(200).json(others);
+      res.status(200).json({
+        message: "OTP sent to email, please verify to complete signup",
+      });
     } catch (err) {
       res.status(500).json(err);
     }
