@@ -6,6 +6,8 @@ const sendOTPEmail = async (email, otp) => {
       throw new Error("Email hoặc OTP không hợp lệ!");
     }
     const transporter = nodemailer.createTransport({
+      secure: true,
+      host: "smtp.gmail.com",
       service: "Gmail",
       auth: {
         user: process.env.EMAIL_USER,
@@ -15,18 +17,18 @@ const sendOTPEmail = async (email, otp) => {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "Your OTP Code",
+      subject: "Mã OTP của bạn",
       text: `Your OTP code is ${otp}`,
       html: `
-          <h1 style="color: #2c3e50;">Welcome to Solve It Out!</h1>
-          <p>Dear Valued User,</p>
-          <p>Thank you for signing up with <strong>Solve It Out</strong>. We are thrilled to have you join our community and look forward to supporting you in achieving your goals.</p>
-          <p>Here is your one-time OTP code for verification:</p>
+          <h1 style="color: #2c3e50;">Chào mừng bạn đến với!</h1>
+          <p>Chào ${email}</p>
+          <p>Cảm ơn bạn đã đăng ký tài khoản tại <strong>...</strong>. Chúng tôi rất vui mừng khi bạn tham gia cộng đồng của chúng tôi và mong muốn được hỗ trợ bạn đạt được mục tiêu của mình.</p>
+          <p>Đây là mã OTP một lần của bạn để xác minh::</p>
           <p style="font-size: 20px; font-weight: bold; color: #0ea5e9;">${otp}</p>
-          <p>Please use this code to complete your registration/login. If you have any questions or need assistance, feel free to reach out to our support team.</p>
-          <p>We are excited to have you on board and can't wait to see all the amazing things you'll accomplish with Solve It Out.</p>
-          <p>Warm regards,</p>
-          <p><strong>The Solve It Out Team</strong></p>
+          <p>Vui lòng sử dụng mã này để hoàn tất đăng ký/đăng nhập. Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, vui lòng liên hệ với nhóm hỗ trợ của chúng tôi.</p>
+          <p>Chúng tôi rất vui mừng khi có bạn tham gia và rất mong được chứng kiến ​​tất cả những điều tuyệt vời mà bạn sẽ đạt được với ...</p>
+          <p>Trân trọng,</p>
+          <p><strong>...</strong></p>
         `,
     };
     const info = await transporter.sendMail(mailOptions);

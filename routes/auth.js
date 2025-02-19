@@ -48,6 +48,8 @@ router.post("/register/find/email", async (req, res) => {
   }
 });
 
+let pendingUsers = {};
+
 //REGISTER
 router.post("/register/phone", async (req, res) => {
   const checkUser = await Users.findOne({
@@ -94,6 +96,12 @@ router.post("/register/email", async (req, res) => {
   const otp = generateOTP();
   const otpHash = await hashPassword(otp, 10);
 
+  pendingUsers = {
+    email: req.body.email,
+    password: newPassword,
+    otpHash,
+  };
+
   if (checkUser) {
     res.status(409).json({
       message: "User already exists",
@@ -119,6 +127,38 @@ router.post("/register/email", async (req, res) => {
     } catch (err) {
       res.status(500).json(err);
     }
+  }
+});
+
+// verify otp
+router.post("/verify-otp", async (req, res) => {
+  const pendingUser = pendingUsers;
+  if (!pendingUser) {
+    return res
+      .status(400)
+      .json({ message: "No signup found, please sign up again." });
+  }
+
+  const isMatch = await comparePassword(req.body.otp, pendingUser.otpHash);
+  if (!pendingUser) {
+    return res
+      .status(400)
+      .json({ message: "No signup found, please sign up again." });
+  }
+
+  const newUser = new Users({
+    email: pendingUser.email,
+    phone: "none",
+    password: pendingUser.password,
+  });
+
+  try {
+    const saveUser = await newUser.save();
+    const { password, ...others } = saveUser._doc;
+
+    res.status(200).json(others);
+  } catch (error) {
+    res.status(500).json(error);
   }
 });
 
