@@ -7,6 +7,7 @@ const Users = require("../models/Users");
 const bcrypt = require("bcryptjs");
 const { hashPassword, comparePassword } = require("../hash/hashPassword");
 const sendOTPEmail = require("../utils/sendEmail");
+const connectRedis = require("../utils/connectRedis");
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
@@ -96,6 +97,8 @@ router.post("/register/email", async (req, res) => {
   const otp = generateOTP();
   const otpHash = await hashPassword(otp, 10);
 
+  const redis = connectRedis();
+
   pendingUsers = {
     email: req.body.email,
     password: newPassword,
@@ -115,6 +118,7 @@ router.post("/register/email", async (req, res) => {
 
     try {
       await sendOTPEmail(req.body.email, otp);
+      await redis.set(`otp:${req.body.email}`, otpHash, "EX", 300);
       console.log(req.body.email);
 
       // const saveUser = await newUser.save();
@@ -133,13 +137,24 @@ router.post("/register/email", async (req, res) => {
 // verify otp
 router.post("/verify-otp", async (req, res) => {
   const pendingUser = pendingUsers;
+  const redis = connectRedis();
+  const otpCheck = await redis.get(`otp:${req.body.email}`);
   if (!pendingUser) {
     return res
       .status(400)
       .json({ message: "No signup found, please sign up again." });
   }
 
-  const isMatch = await comparePassword(req.body.otp, pendingUser.otpHash);
+  try {
+    const isMatch = await comparePassword(req.body.otp, otpCheck);
+    const otpCheck = await redis.get(`otp:${req.body.email}`);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid OTP" });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "Invalid OTP" });
+  }
+
   if (!pendingUser) {
     return res
       .status(400)
