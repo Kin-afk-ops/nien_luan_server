@@ -117,9 +117,15 @@ router.post("/register/email", async (req, res) => {
     // });
 
     try {
-      await sendOTPEmail(req.body.email, otp);
-      await redis.set(`otp:${req.body.email}`, otpHash, "EX", 300);
-      console.log(req.body.email);
+      if (await redis.get(`otp:${req.body.email}`)) {
+        await redis.del(`otp:${req.body.email}`);
+        await sendOTPEmail(req.body.email, otp);
+        await redis.set(`otp:${req.body.email}`, otpHash, "EX", 300);
+      } else {
+        await sendOTPEmail(req.body.email, otp);
+        await redis.set(`otp:${req.body.email}`, otpHash, "EX", 300);
+        console.log(req.body.email);
+      }
 
       // const saveUser = await newUser.save();
       // const { password, ...others } = saveUser._doc;
@@ -138,21 +144,30 @@ router.post("/register/email", async (req, res) => {
 router.post("/verify-otp", async (req, res) => {
   const pendingUser = pendingUsers;
   const redis = connectRedis();
-  const otpCheck = await redis.get(`otp:${req.body.email}`);
   if (!pendingUser) {
     return res
       .status(400)
       .json({ message: "No signup found, please sign up again." });
   }
 
+  if (!req.body.otp) {
+    return res.status(400).json({ message: "Hãy nhập mã OTP" });
+  }
+
   try {
-    const isMatch = await comparePassword(req.body.otp, otpCheck);
     const otpCheck = await redis.get(`otp:${req.body.email}`);
+
+    if (!otpCheck) {
+      return res.status(400).json({ message: "Mã OTP hết hạn" });
+    }
+    const isMatch = await comparePassword(req.body.otp, otpCheck);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid OTP" });
+      return res
+        .status(400)
+        .json({ message: "Sai mã OTP hoặc mã OTP hết hạn" });
     }
   } catch (error) {
-    return res.status(400).json({ message: "Invalid OTP" });
+    return res.status(400).json({ message: "Sai mã OTP hoặc mã OTP hết hạn" });
   }
 
   if (!pendingUser) {
@@ -170,6 +185,7 @@ router.post("/verify-otp", async (req, res) => {
   try {
     const saveUser = await newUser.save();
     const { password, ...others } = saveUser._doc;
+    redis.del(`otp:${req.body.email}`);
 
     res.status(200).json(others);
   } catch (error) {
