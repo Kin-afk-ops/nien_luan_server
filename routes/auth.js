@@ -8,6 +8,7 @@ const bcrypt = require("bcryptjs");
 const { hashPassword, comparePassword } = require("../hash/hashPassword");
 const sendOTPEmail = require("../utils/sendEmail");
 const connectRedis = require("../utils/connectRedis");
+const sendSMS = require("../utils/sendSMS");
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
@@ -53,38 +54,37 @@ let pendingUsers = {};
 
 //REGISTER
 router.post("/register/phone", async (req, res) => {
-  const checkUser = await Users.findOne({
-    phone: req.body.phone,
-  });
+  // const checkUser = await Users.findOne({
+  //   phone: req.body.phone,
+  // });
 
-  const newPassword = await hashPassword(req.body.password);
+  // const newPassword = await hashPassword(req.body.password);
 
-  const otp = generateOTP();
-  const otpHash = await hashPassword(otp, 10);
+  // const otp = generateOTP();
+  // const otpHash = await hashPassword(otp, 10);
 
-  if (checkUser) {
-    res.status(409).json({
-      message: "User already exists",
+  // if (checkUser) {
+  //   res.status(409).json({
+  //     message: "User already exists",
+  //   });
+  // } else {
+  //   // const newUser = new Users({
+  //   //   phone: req.body.phone,
+  //   //   email: "none",
+  //   //   password: newPassword,
+  //   // });
+
+  try {
+    sendSMS("+84589443320", "test ná»™i dung sms", 2, "");
+    // const saveUser = await newUser.save();
+    // const { password, ...others } = saveUser._doc;
+
+    // res.status(200).json(others);
+    res.status(200).json({
+      message: "OTP sent to phone, please verify to complete signup",
     });
-  } else {
-    // const newUser = new Users({
-    //   phone: req.body.phone,
-    //   email: "none",
-    //   password: newPassword,
-    // });
-
-    try {
-      await sendOTPEmail(email, otp);
-      // const saveUser = await newUser.save();
-      // const { password, ...others } = saveUser._doc;
-
-      // res.status(200).json(others);
-      res.status(200).json({
-        message: "OTP sent to email, please verify to complete signup",
-      });
-    } catch (err) {
-      res.status(500).json(err);
-    }
+  } catch (err) {
+    res.status(500).json(err);
   }
 });
 
@@ -265,6 +265,26 @@ router.post("/login/email", async (req, res) => {
     res.status(200).json({ ...others, accessToken });
   } catch (err) {
     res.status(500).json(err);
+  }
+});
+
+router.post("/login/firebase-login", async (req, res) => {
+  const { token } = req.body;
+
+  if (!token) {
+    return res.status(400).json({ message: "No token provided" });
+  }
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(token);
+    console.log("Decoded User:", decodedToken);
+
+    // Xử lý đăng ký hoặc đăng nhập user vào database của bạn
+    res
+      .status(200)
+      .json({ message: "Authentication successful", user: decodedToken });
+  } catch (error) {
+    res.status(401).json({ message: "Invalid token", error });
   }
 });
 
