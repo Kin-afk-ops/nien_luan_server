@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
+const productRoutes = require('./src/routes/app.route');
 
 const app = express();
 
@@ -33,3 +34,5 @@ app.use(function (req, res, next) {
   );
   next();
 });
+
+app.use("/api", productRoutes);
