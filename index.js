@@ -3,9 +3,8 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 
-//Router
-const authRoute = require("./routes/auth");
-const userRoute = require("./routes/user");
+// Router
+const appRouter = require("./src/routes/app.route");
 
 const app = express();
 
@@ -33,9 +32,6 @@ app.listen(PORT, () => {
   console.log("connect to port " + PORT);
 });
 
-app.use("/api/auth", authRoute);
-app.use("/api/user", userRoute);
-
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -44,3 +40,5 @@ app.use(function (req, res, next) {
   );
   next();
 });
+
+app.use("/api", appRouter);
