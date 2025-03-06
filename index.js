@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 
 // Router
 const appRouter = require("./src/routes/app.route");
+const infoUserRoute = require("./src/routes/infoUser");
 
 const app = express();
 
@@ -32,13 +33,14 @@ app.listen(PORT, () => {
   console.log("connect to port " + PORT);
 });
 
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
+// app.use(function (req, res, next) {
+//   res.header("Access-Control-Allow-Origin", "*");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   next();
+// });
 
 app.use("/api", appRouter);
+app.use("/api/infoUser", infoUserRoute);

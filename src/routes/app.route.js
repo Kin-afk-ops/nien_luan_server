@@ -6,6 +6,11 @@ const productController = require("../controllers/ProductController");
 const userController = require("../controllers/userController");
 const categoryController = require("../controllers/CategoriesController");
 const authController = require("../controllers/authController");
+
+const imageController = require("../controllers/imageController");
+
+const fileUploader = require("../../config/cloudinary");
+
 router.get("/products", (req, res) => {
   res.json(products);
 });
@@ -36,7 +41,7 @@ router.get(
   categoryController.getParentCategories
 );
 
-//User
+//auth
 router.post("/auth/register/find/phone", authController.findUserPhone);
 router.post("/auth/register/find/email", authController.findUserEmail);
 router.post("/auth/register/phone", authController.registerUserPhone);
@@ -44,7 +49,21 @@ router.post("/auth/register/email", authController.registerUserEmail);
 router.post("/auth/login/phone", authController.loginUserPhone);
 router.post("/auth/login/email", authController.loginUserEmail);
 
+// user
+router.get("/user", userController.getAllUser);
+
 // OTP
 router.post("/auth/verify-otp", authController.verifyOtp);
+
+// Image
+router.post(
+  "/image/upload",
+  fileUploader.single("file"),
+  imageController.uploadImage
+);
+
+router.delete("/image/remove/:id", imageController.removeImage);
+
+// InfoUser
 
 module.exports = router;
