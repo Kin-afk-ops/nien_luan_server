@@ -25,33 +25,9 @@ const InfoUsersSchema = new mongoose.Schema(
     birthday: {
       type: String,
     },
-    address: [
-      {
-        province: {
-          type: String,
-          require: true,
-        },
-        district: {
-          type: String,
-          require: true,
-        },
-        ward: {
-          type: String,
-          require: true,
-        },
-        address: {
-          type: String,
-          require: true,
-        },
-        default: {
-          type: Boolean,
-          require: true,
-        },
-      },
-    ],
 
     introduce: {
-      type: string,
+      type: String,
     },
   },
   { timestamps: true }
