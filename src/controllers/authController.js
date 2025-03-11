@@ -68,17 +68,6 @@ exports.registerUserPhone = async (req, res) => {
     });
   } else {
     try {
-      await sendSMS(req.body.phone, otp);
-      // if (await redis.get(`otp:${req.body.phone}`)) {
-      //   // await redis.del(`otp:${req.body.phone}`);
-      //   await sendSMS(req.body.phone, otp);
-      //   // await redis.set(`otp:${req.body.phone}`, otpHash, "EX", 300);
-      // } else {
-      //   await sendSMS(req.body.phone, otp);
-      //   // await redis.set(`otp:${req.body.phone}`, otpHash, "EX", 300);
-      //   // console.log(req.body.phone);
-      // }
-
       res.status(200).json({
         message: "OTP sent to phone number, please verify to complete signup",
       });

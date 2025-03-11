@@ -74,14 +74,6 @@ router.post("/register/phone", async (req, res) => {
   //   // });
 
   try {
-    sendSMS("+84589443320", "test ná»™i dung sms", 2, "");
-    // const saveUser = await newUser.save();
-    // const { password, ...others } = saveUser._doc;
-
-    // res.status(200).json(others);
-    res.status(200).json({
-      message: "OTP sent to phone, please verify to complete signup",
-    });
   } catch (err) {
     res.status(500).json(err);
   }
