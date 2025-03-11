@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const AddressInfoUser = new mongoose.Schema(
+const AddressInfoUserSchema = new mongoose.Schema(
   {
     userId: {
       type: String,
@@ -53,4 +53,4 @@ const AddressInfoUser = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("AddressInfoUser", AddressInfoUser);
+module.exports = mongoose.model("AddressInfoUser", AddressInfoUserSchema);

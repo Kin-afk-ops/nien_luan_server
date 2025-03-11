@@ -4,7 +4,6 @@ const bcrypt = require("bcryptjs");
 const { hashPassword, comparePassword } = require("../../hash/hashPassword");
 const sendOTPEmail = require("../../utils/sendEmail");
 const connectRedis = require("../../utils/connectRedis");
-const sendSMS = require("../../utils/sendSMS");
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP

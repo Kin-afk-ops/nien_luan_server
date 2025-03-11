@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const AddressInfoUser = require("./AddressInfoUser");
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -12,10 +13,18 @@ const ProductSchema = new mongoose.Schema(
     },
 
     categories: {
-      type: String,
-      required: true,
-      unique: true,
+      name: {
+        type: String,
+      },
+      slug: {
+        type: String,
+      },
+      parentId: {
+        type: String,
+        default: null,
+      },
     },
+
     slug: {
       type: String,
       required: true,
@@ -41,10 +50,7 @@ const ProductSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
-    addressId: {
-      type: String,
-      required: true,
-    },
+    address: AddressInfoUser.schema,
     discount: {
       type: Number,
     },
