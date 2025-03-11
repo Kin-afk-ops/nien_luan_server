@@ -10,6 +10,7 @@ const addressInfoUserRoute = require("./src/routes/addressInfoUser");
 const productRoute = require("./src/routes/product");
 const imageProductRoute = require("./src/routes/imageProduct");
 const commentProductRoute = require("./src/routes/commentProduct");
+const cartRoute = require("./src/routes/cart");
 
 const app = express();
 
@@ -52,3 +53,4 @@ app.use("/api/addressInfoUser", addressInfoUserRoute);
 app.use("/api/product", productRoute);
 app.use("/api/imageProduct", imageProductRoute);
 app.use("/api/commentProduct", commentProductRoute);
+app.use("/api/cart", cartRoute);
