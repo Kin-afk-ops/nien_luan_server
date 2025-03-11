@@ -8,7 +8,9 @@ exports.createCart = async (req, res) => {
   });
   try {
     const saveCart = await newCart.save();
-    res.status(200).json(saveCart);
+    res
+      .status(200)
+      .json(await Cart.findById(saveCart._id).populate("productId"));
   } catch (error) {
     res.status(500).json(error);
   }
@@ -16,7 +18,10 @@ exports.createCart = async (req, res) => {
 
 exports.readCart = async (req, res) => {
   try {
-    const cart = await Cart.find({ buyerId: req.params.id });
+    const cart = await Cart.find({ buyerId: req.params.id })
+      .populate("productId") // Lấy đầy đủ thông tin của productId
+      .exec();
+
     if (cart) {
       res.status(200).json(cart);
     } else {
