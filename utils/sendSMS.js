@@ -1,52 +1,22 @@
-const http = require("http");
-const https = require("https");
+const twilio = require("twilio");
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
+const client = twilio(
+  "ACebe5708ac20760bf2b5eb65b33a37293",
+  "cd0a5faf0d8b86d1a3ce72bff32e1809"
+);
 
-const sendSMS = (phones, content, type, sender) => {
-  var url = "api.speedsms.vn";
-  var params = JSON.stringify({
-    to: phones,
-    content: content,
-    sms_type: type,
-    sender: sender,
-  });
-
-  var buf = new Buffer(process.env.SMS_KEY + ":x");
-  var auth = "Basic " + buf.toString("base64");
-  const options = {
-    hostname: url,
-    port: 443,
-    path: "/index.php/sms/send",
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: auth,
-    },
-  };
-
-  const req = https.request(options, function (res) {
-    res.setEncoding("utf8");
-    var body = "";
-    res.on("data", function (d) {
-      body += d;
+const sendSMS = async (phoneNumber, otp) => {
+  try {
+    await client.messages.create({
+      body: `Mã OTP của bạn là: ${otp}`,
+      from: "+15344295994",
+      to: phoneNumber,
     });
-    res.on("end", function () {
-      var json = JSON.parse(body);
-      if (json.status == "success") {
-        console.log("send sms success");
-      } else {
-        console.log("send sms failed " + body);
-      }
-    });
-  });
-
-  req.on("error", function (e) {
-    console.log("send sms failed: " + e);
-  });
-
-  req.write(params);
-  req.end();
+    console.log(client);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
-//send test sms
-//sendSMS(['your phone number'], "test ná»™i dung sms", 2, '');
 module.exports = sendSMS;

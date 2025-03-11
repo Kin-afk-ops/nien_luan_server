@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const appRouter = require("./src/routes/app.route");
 const infoUserRoute = require("./src/routes/infoUser");
 const addressInfoUserRoute = require("./src/routes/addressInfoUser");
+const productRoute = require("./src/routes/product");
 
 const app = express();
 
@@ -46,3 +47,4 @@ app.listen(PORT, () => {
 app.use("/api", appRouter);
 app.use("/api/infoUser", infoUserRoute);
 app.use("/api/addressInfoUser", addressInfoUserRoute);
+app.use("/api/product", productRoute);

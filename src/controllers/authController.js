@@ -48,37 +48,44 @@ exports.findUserEmail = async (req, res) => {
 };
 
 exports.registerUserPhone = async (req, res) => {
-  // const checkUser = await Users.findOne({
-  //   phone: req.body.phone,
-  // });
+  const checkUser = await Users.findOne({
+    phone: req.body.phone,
+  });
 
-  // const newPassword = await hashPassword(req.body.password);
+  const newPassword = await hashPassword(req.body.password);
+  const otp = generateOTP();
+  const otpHash = await hashPassword(otp, 10);
 
-  // const otp = generateOTP();
-  // const otpHash = await hashPassword(otp, 10);
+  const redis = connectRedis();
 
-  // if (checkUser) {
-  //   res.status(409).json({
-  //     message: "User already exists",
-  //   });
-  // } else {
-  //   // const newUser = new Users({
-  //   //   phone: req.body.phone,
-  //   //   email: "none",
-  //   //   password: newPassword,
-  //   // });
-
-  try {
-    sendSMS("+84589443320", "test ná»™i dung sms", 2, "");
-    // const saveUser = await newUser.save();
-    // const { password, ...others } = saveUser._doc;
-
-    // res.status(200).json(others);
-    res.status(200).json({
-      message: "OTP sent to phone, please verify to complete signup",
+  pendingUsers = {
+    phone: req.body.phone,
+    password: newPassword,
+    otpHash,
+  };
+  if (checkUser) {
+    res.status(409).json({
+      message: "User already exists",
     });
-  } catch (err) {
-    res.status(500).json(err);
+  } else {
+    try {
+      await sendSMS(req.body.phone, otp);
+      // if (await redis.get(`otp:${req.body.phone}`)) {
+      //   // await redis.del(`otp:${req.body.phone}`);
+      //   await sendSMS(req.body.phone, otp);
+      //   // await redis.set(`otp:${req.body.phone}`, otpHash, "EX", 300);
+      // } else {
+      //   await sendSMS(req.body.phone, otp);
+      //   // await redis.set(`otp:${req.body.phone}`, otpHash, "EX", 300);
+      //   // console.log(req.body.phone);
+      // }
+
+      res.status(200).json({
+        message: "OTP sent to phone number, please verify to complete signup",
+      });
+    } catch (err) {
+      res.status(500).json(err);
+    }
   }
 };
 
