@@ -234,3 +234,88 @@ exports.verifyOtp = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
+exports.updateEmail = async (req, res) => {
+  const user = await Users.findById(req.params.id);
+  if (!user) {
+    res.status(409).json({ message: "Tài khoản không tồn tại" });
+  } else {
+    const otp = generateOTP();
+    const otpHash = await hashPassword(otp, 10);
+
+    const redis = connectRedis();
+
+    try {
+      if (await redis.get(`otp:${req.body.email}`)) {
+        await redis.del(`otp:${req.body.email}`);
+        await redis.set(`otp:${req.body.email}`, otpHash, "EX", 300);
+        await sendOTPEmail(req.body.email, otp);
+      } else {
+        await redis.set(`otp:${req.body.email}`, otpHash, "EX", 300);
+        await sendOTPEmail(req.body.email, otp);
+        console.log(req.body.email);
+      }
+
+      // const saveUser = await newUser.save();
+      // const { password, ...others } = saveUser._doc;
+
+      // res.status(200).json(others);
+      res.status(200).json({
+        message: "OTP sent to email, please verify to complete signup",
+      });
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  }
+
+  // try {
+  //   const updateUser = await Users.findByIdAndUpdate(
+  //     req.params.id,
+  //     {
+  //       $set: req.body,
+  //     },
+  //     { new: true }
+  //   );
+  //   res.status(200).json(updateUser);
+  // } catch (error) {
+  //   res.status(500).json(error);
+  // }
+};
+
+exports.verifyUpdateUser = async (req, res) => {
+  const redis = connectRedis();
+
+  if (!req.params.otp) {
+    return res.status(400).json({ message: "Hãy nhập mã OTP" });
+  }
+
+  try {
+    const otpCheck = await redis.get(`otp:${req.body.email}`);
+
+    if (!otpCheck) {
+      return res.status(400).json({ message: "Mã OTP hết hạn" });
+    }
+    const isMatch = await comparePassword(req.params.otp, otpCheck);
+    if (!isMatch) {
+      return res
+        .status(400)
+        .json({ message: "Sai mã OTP hoặc mã OTP hết hạn" });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "Sai mã OTP hoặc mã OTP hết hạn" });
+  }
+
+  try {
+    const updateUser = await Users.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: req.body,
+      },
+      { new: true }
+    );
+    res.status(200).json(updateUser);
+    redis.del(`otp:${req.body.email}`);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};

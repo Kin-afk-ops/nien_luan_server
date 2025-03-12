@@ -6,6 +6,10 @@ const productController = require("../controllers/ProductController");
 const userController = require("../controllers/userController");
 const categoryController = require("../controllers/CategoriesController");
 const authController = require("../controllers/authController");
+const {
+  verifyTokenUser,
+  verifyTokenAnhAuthorizationUser,
+} = require("../../jwt/verifyTokenUser");
 
 const imageController = require("../controllers/imageController");
 
@@ -48,12 +52,22 @@ router.post("/auth/register/phone", authController.registerUserPhone);
 router.post("/auth/register/email", authController.registerUserEmail);
 router.post("/auth/login/phone", authController.loginUserPhone);
 router.post("/auth/login/email", authController.loginUserEmail);
+router.post(
+  "/auth/update/email/:id",
+  verifyTokenAnhAuthorizationUser,
+  authController.updateEmail
+);
 
 // user
 router.get("/user", userController.getAllUser);
 
 // OTP
 router.post("/auth/verify-otp", authController.verifyOtp);
+router.put(
+  "/auth/verify-otp-email/:id/:otp",
+  verifyTokenAnhAuthorizationUser,
+  authController.verifyUpdateUser
+);
 
 // Image
 router.post(
