@@ -57,9 +57,16 @@ router.post(
   verifyTokenAnhAuthorizationUser,
   authController.updateEmail
 );
+router.put(
+  "/auth/update/password/:id",
+  verifyTokenAnhAuthorizationUser,
+  authController.updatePassword
+);
 
 // user
 router.get("/user", userController.getAllUser);
+
+router.delete("/user", userController.deleteAllUser);
 
 // OTP
 router.post("/auth/verify-otp", authController.verifyOtp);

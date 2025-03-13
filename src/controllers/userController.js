@@ -28,3 +28,12 @@ exports.getAllUser = async (req, res) => {
 };
 
 // LInh put
+
+exports.deleteAllUser = async (req, res) => {
+  try {
+    await Users.deleteMany();
+    res.status(200).json("User has been deleted...");
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};

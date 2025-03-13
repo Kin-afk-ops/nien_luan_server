@@ -319,3 +319,21 @@ exports.verifyUpdateUser = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
+exports.updatePassword = async (req, res) => {
+  const newUser = {
+    password: await hashPassword(req.body.password),
+  };
+  try {
+    const updateUser = await Users.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: newUser,
+      },
+      { new: true }
+    );
+    res.status(200).json(updateUser);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
