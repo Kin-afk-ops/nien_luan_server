@@ -23,6 +23,7 @@ router.get("/products/similar/:id", productController.getSimilarProductById);
 router.get("/seller/:id", userController.getSellerById);
 router.get("/categories/:slug",categoryController.getCategoryDataBySlug);
 router.get("/categories/products/:id",productController.getAllProductsByCategoryId);
+router.get("/categories/list/:id",categoryController.getListCategories);
 router.get("/categories/breadcrumb/:id", categoryController.getParentCategories);
 
 module.exports = router;

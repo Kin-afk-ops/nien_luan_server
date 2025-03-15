@@ -1,5 +1,6 @@
 const productsData  = require('../models/ProductTest');
 const categoriesData  = require('../models/CategoriesData');
+const {getAllChildCategories} = require('../services/categoryServices');
 
 exports.getProductBySlug = (req, res) => { 
     const { categorySlug, productSlug, id } = req.params;
@@ -81,11 +82,20 @@ exports.getAllProductsByCategoryId = async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 48;
         const sort = req.query.sort || "newest";
+        const minPrice = req.query.minPrice ? parseInt(req.query.minPrice) : 0;
+        const maxPrice = req.query.maxPrice ? parseInt(req.query.maxPrice) : 1000000000;
         const skip = (page - 1) * limit; // Bỏ qua các sản phẩm đã duyệt ở trước
         if(isNaN(categoryId)) {
             return res.status(404).json({ message: "ID danh mục không hợp lệ"})
         }
-        const products = await productsData.filter(p => p.categoryId === categoryId);
+
+        const validateCategoryIds = getAllChildCategories(categoryId); 
+        let products = productsData.filter(p => validateCategoryIds.includes(p.categoryId));
+
+        products = products.filter(p => p.price >= minPrice && p.price <= maxPrice);
+        if(req.query.maxPrice) {
+            console.log("Max price ", maxPrice)
+        }
 
         switch (sort) {
             case "newest":
@@ -106,8 +116,6 @@ exports.getAllProductsByCategoryId = async (req, res) => {
         }
         const totalProducts = products.length;
         const paginatedProduct = products.slice(skip, skip + limit);
-
-        console.log(paginatedProduct)
 
         if(!products) return res.status(404).json({ message: "Sản phẩm thuộc danh mục không tồn tại" });
         return res.json({

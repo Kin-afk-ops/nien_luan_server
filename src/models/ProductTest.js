@@ -352,7 +352,57 @@ const products = [
         updatedAt: "2023-06-01T00:00:00.000Z",
         location: "Kiêng Giang",
         status: "Mới"
-      }
+      },
+    {
+            id: 388836,
+            sellerId: 10009,
+            name: "Cửu Long quái sự ký",
+            description: "Description for product 9",   
+            price: 200000,
+            categoryId: 2,
+            categorySlug: "mua-ban-sach",
+            quantityStock: 100,
+            slug: "cuu-long-quai-su-ky",
+            discount: 10,
+            shippingFee: "Free ship",
+            size: "Tiêu chuẩn",
+            condition: "new",
+            imageUris: [
+                "https://datdongradio.com/upload/images/TRUYEN-DAI/CLQSK/cuu-long-quai-su-ky-thien-10-thuy-dao-ham-luong-nghe-truyen-ma-audio-nguyen-huy-chuyen-ma.jpg"
+            ],
+            imageId: "image7",
+            commentIds: [],
+            reportID: null,
+            createdAt: "2023-07-01T00:00:00.000Z",
+            updatedAt: "2023-07-01T00:00:00.000Z",
+            location: "Kiên Giang",
+            status: "Mới"
+            },
+            {
+                id: 388837,
+                sellerId: 10009,
+                name: "Cửu Long quái sự ký thiên 2",
+                description: "Description for product 9",   
+                price: 350000,
+                categoryId: 2,
+                categorySlug: "mua-ban-sach",
+                quantityStock: 100,
+                slug: "cuu-long-quai-su-ky",
+                discount: 10,
+                shippingFee: "Free ship",
+                size: "Tiêu chuẩn",
+                condition: "new",
+                imageUris: [
+                    "https://i0.wp.com/radiosach.com/public/upload/cover/cuu-long-quai-su-ky.jpg"
+                ],
+                imageId: "image8",
+                commentIds: [],
+                reportID: null,
+                createdAt: "2023-07-01T00:00:00.000Z",
+                updatedAt: "2023-07-01T00:00:00.000Z",
+                location: "Kiên Giang",
+                status: "Mới"
+                },
 ];
 
 module.exports = products;
