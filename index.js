@@ -4,20 +4,25 @@ const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const productRoutes = require('./src/routes/app.route');
 
+// Router
+const appRouter = require("./src/routes/app.route");
+const infoUserRoute = require("./src/routes/infoUser");
+const addressInfoUserRoute = require("./src/routes/addressInfoUser");
+const productRoute = require("./src/routes/product");
+const imageProductRoute = require("./src/routes/imageProduct");
+const commentProductRoute = require("./src/routes/commentProduct");
+const cartRoute = require("./src/routes/cart");
+const orderRoute = require("./src/routes/order");
+
 const app = express();
 
-app.use(
-  cors({ credentials: true, origin: true, exposedHeaders: ["Set-Cookie"] })
-);
+const corsOptions = {
+  origin: ["http://localhost:3000"],
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  credentials: true,
+};
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  next();
-});
-
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
 app.use(express.json());
 
 dotenv.config();
@@ -44,4 +49,11 @@ app.listen(PORT, () => {
 //   next();
 // });
 
-app.use("/api", productRoutes);
+app.use("/api", appRouter);
+app.use("/api/infoUser", infoUserRoute);
+app.use("/api/addressInfoUser", addressInfoUserRoute);
+app.use("/api/product", productRoute);
+app.use("/api/imageProduct", imageProductRoute);
+app.use("/api/commentProduct", commentProductRoute);
+app.use("/api/cart", cartRoute);
+app.use("/api/order", orderRoute);

@@ -7,8 +7,8 @@ const categoriesData = [
   { id: 6, name: 'Sách ma thuật', slug: 'sach-ma-thuat', parentId: 2 },
   { id: 7, name: 'Sách phép', slug: 'sach-phep', parentId: 2 },
   { id: 8, name: 'Đồ điện tử', slug: 'do-dien-tu', parentId: 1 },
-  { id: 9, name: 'Điện thoại', slug: 'dien-thoai', parentId: 8 },
-  { id: 10, name: 'Laptop', slug: 'laptop', parentId: 8 },
+  { id: 9, name: 'Điện thoại', slug: 'dien-thoai', parentId: 8, attributeId: 1003 },
+  { id: 10, name: 'Laptop', slug: 'laptop', parentId: 8, attributeId: 1002 },
   { id: 11, name: 'Máy ảnh', slug: 'may-anh', parentId: 8 },
   { id: 12, name: 'Máy tính bảng', slug: 'may-tinh-bang', parentId: 8 },
   { id: 13, name: 'Đồ gia dụng', slug: 'do-gia-dung', parentId: 1 },
@@ -27,6 +27,11 @@ const categoriesData = [
   { id: 26, name: 'Đồ chơi tàu du lịch', slug: 'do-choi-tau-du-lich', parentId: 16 },
   { id: 27, name: 'Đồ chơi tàu vũ trụ', slug: 'do-choi-tau-vu-tru', parentId: 16 },
   {id: 28, name: "Sách ma thuật đen", slug: "sach-ma-thuat-den", parentId: 2},
+  {id: 29, name: "Đồ cho nam", slug:"do-cho-nam", parentId: 2},
+  {id: 30, name: "Đồ cho nữ", slug:"do-cho-nu", parentId: 2},
+  {id: 31, name: "Đồ cho trẻ em", slug:"do-cho-tre-em", parentId: 2},
+  {id: 32, name: "Đồ cho người già", slug:"do-cho-nguoi-gia", parentId: 2},
+  
 ]
 
 module.exports = categoriesData;
