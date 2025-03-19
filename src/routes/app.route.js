@@ -15,9 +15,7 @@ const imageController = require("../controllers/imageController");
 
 const fileUploader = require("../../config/cloudinary");
 
-router.get("/products", (req, res) => {
-  res.json(products);
-});
+router.get("/products", productController.getAllProducts);
 
 router.get("/categories", (req, res) => {
   res.json(categories);
@@ -45,6 +43,12 @@ router.get(
   categoryController.getParentCategories
 );
 
+router.get("/categories/list/:id", categoryController.getListCategories);
+router.get(
+  "/categories/attributes/:id",
+  categoryController.getAttributesOfCategory
+);
+
 //auth
 router.post("/auth/register/find/phone", authController.findUserPhone);
 router.post("/auth/register/find/email", authController.findUserEmail);
@@ -57,6 +61,9 @@ router.post(
   verifyTokenAnhAuthorizationUser,
   authController.updateEmail
 );
+
+router.post("/products/createTest", productController.createTestProduct);
+
 router.put(
   "/auth/update/password/:id",
   verifyTokenAnhAuthorizationUser,
@@ -84,6 +91,8 @@ router.post(
 );
 
 router.delete("/image/remove/:id", imageController.removeImage);
+
+router.get("/getAllProductTest", productController.getAllProducts);
 
 // InfoUser
 

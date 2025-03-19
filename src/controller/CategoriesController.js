@@ -1,9 +1,5 @@
 const categoriesData = require("../models/CategoriesData");
-<<<<<<< HEAD
-=======
-const cateData = require("../models/CateData");
 const {getAllChildCategoriesInfo} = require('../services/categoryServices');
->>>>>>> nhut
 
 exports.getParentCategories = (req, res) => {
     const categoryId = parseInt(req.params.id);
@@ -35,8 +31,6 @@ exports.getCategoryDataBySlug = async (req, res) => {
         console.error("Lỗi khi lấy thông tin danh mục", e);
         return res.status(500).json({ message: "Lỗi server khi lấy thông tin danh mục", error });
     }
-<<<<<<< HEAD
-=======
 }
 
 exports.getListCategories = async (req, res) => {
@@ -49,18 +43,4 @@ exports.getListCategories = async (req, res) => {
         console.error("Lỗi khi lấy danh sách danh mục", error);
         return res.status(500).json({ message: "Lỗi server khi lấy danh sách danh mục", error });
     }
-}
-
-exports.getAttributesOfCategory = async (req, res) => {
-    try{
-        const id = parseInt(req.params.id);
-        const category =  categoriesData.find(cat => cat.id === id);
-        const attributeList =  cateData.find((attr) => attr.attributeId === category.attributeId);
-        if(!attributeList) return res.status(404).json({ message: "Không tìm thấy thông tin danh mục" });
-        return res.json(attributeList);
-    }catch(error) {
-        console.error("Lỗi khi lấy thông tin danh mục ở category controller", error);
-        return res.status(500).json({ message: "Lỗi server khi lấy thông tin danh mục", error });
-    }
->>>>>>> nhut
 }

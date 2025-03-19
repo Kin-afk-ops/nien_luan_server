@@ -13,6 +13,9 @@ const ProductSchema = new mongoose.Schema(
     },
 
     categories: {
+      id: {
+        type: Number,
+      },
       name: {
         type: String,
       },
@@ -51,8 +54,23 @@ const ProductSchema = new mongoose.Schema(
       default: {},
     },
     address: AddressInfoUser.schema,
+    images: {
+      id: {
+        type: Number,
+      },
+      url: {
+        type: [String],
+      },
+    },
     discount: {
       type: Number,
+    },
+    size: {
+      type: String,
+    },
+    isFreeShip: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
