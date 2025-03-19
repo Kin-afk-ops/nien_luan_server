@@ -2,17 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
-const productRoutes = require('./src/routes/app.route');
-
-// Router
-const appRouter = require("./src/routes/app.route");
-const infoUserRoute = require("./src/routes/infoUser");
-const addressInfoUserRoute = require("./src/routes/addressInfoUser");
-const productRoute = require("./src/routes/product");
-const imageProductRoute = require("./src/routes/imageProduct");
-const commentProductRoute = require("./src/routes/commentProduct");
-const cartRoute = require("./src/routes/cart");
-const orderRoute = require("./src/routes/order");
+// const productRoutes = require('./src/routes/app.route');
 
 // Router
 const appRouter = require("./src/routes/app.route");

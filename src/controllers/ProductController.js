@@ -232,7 +232,9 @@ exports.createTestProduct = async (req, res) => {
 
 exports.getProductBySellerId = async (req, res) => {
   try {
-    const product = await Products.find({ sellerId: req.params.id });
+    const product = await Products.find({ sellerId: req.params.id }).sort({
+      createdAt: -1,
+    });
 
     res.status(200).json(product);
   } catch (error) {
@@ -240,17 +242,48 @@ exports.getProductBySellerId = async (req, res) => {
   }
 };
 
-exports.getProductByCategories = async (req, res) => {
-  try {
-    const product = await Products.find({ "categories.id": req.params.id });
+exports.getSearchProducts = async (req, res) => {
+  const { searchValue, cateValue, dateValue, statusValue } = req.query;
 
-    if (product.length !== 0) {
-      res.status(200).json(product);
+  try {
+    // Tạo bộ lọc tìm kiếm
+    const filter = {};
+
+    // 🔎 Tìm kiếm theo tên sản phẩm (dùng regex để không phân biệt hoa thường)
+    if (searchValue) {
+      filter.name = { $regex: searchValue, $options: "i" };
+    }
+
+    // 🔎 Lọc theo danh mục (dùng ID)
+    if (cateValue) {
+      filter["categories.id"] = cateValue; // Chuyển đổi sang số nguyên
+    }
+
+    // 🔎 Lọc theo ngày tạo (tìm trong khoảng thời gian)
+    if (dateValue) {
+      const startDate = new Date(dateValue);
+      const endDate = new Date(dateValue);
+      endDate.setHours(23, 59, 59, 999); // Lấy hết giờ trong ngày
+
+      filter.createdAt = { $gte: startDate, $lte: endDate };
+    }
+
+    // 🔎 Lọc theo trạng thái (tuỳ theo định nghĩa trạng thái của bạn)
+    if (statusValue) {
+      filter.condition = statusValue;
+    }
+
+    // 👉 Truy vấn MongoDB theo bộ lọc
+    const products = await Products.find(filter).sort({ createdAt: -1 });
+
+    if (products.length !== 0) {
+      res.status(200).json(products);
     } else {
-      res.status(403).json("Không có dữ liệu");
+      res.status(404).json({ message: "Không có dữ liệu." });
     }
   } catch (error) {
-    res.status(500).json(error);
+    console.error("Lỗi khi tìm kiếm sản phẩm:", error);
+    res.status(500).json({ error: "Đã xảy ra lỗi" });
   }
 };
 
