@@ -13,7 +13,7 @@ const ProductSchema = new mongoose.Schema(
     },
 
     categories: {
-      id:{
+      id: {
         type: Number,
       },
       name: {
