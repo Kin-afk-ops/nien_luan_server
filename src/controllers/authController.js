@@ -159,7 +159,7 @@ exports.loginUserPhone = async (req, res) => {
 exports.loginUserEmail = async (req, res) => {
   try {
     const user = await Users.findOne({ email: req.body.email });
-    !user && res.status(401).json("Wrong credential");
+    if(!user) return res.status(401).json("Wrong credential");
 
     const isPasswordValid = await comparePassword(
       req.body.password,
@@ -177,7 +177,7 @@ exports.loginUserEmail = async (req, res) => {
     );
     const { password, ...others } = user._doc;
 
-    res.status(200).json({ ...others, accessToken });
+    return res.status(200).json({ ...others, accessToken });
   } catch (err) {
     res.status(500).json(err);
   }

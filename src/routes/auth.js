@@ -234,6 +234,7 @@ router.post("/login/phone", async (req, res) => {
 
 router.post("/login/email", async (req, res) => {
   try {
+    console.log("This is Login");
     const user = await Users.findOne({ email: req.body.email });
     !user && res.status(401).json("Wrong credential");
 

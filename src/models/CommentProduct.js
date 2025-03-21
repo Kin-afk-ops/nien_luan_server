@@ -17,6 +17,11 @@ const CommentProductSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    likedBy: {
+      type: [String], // Danh sách ID của user đã like
+      ref: "Users",
+      default: [],
+    },
   },
   { timestamps: true }
 );

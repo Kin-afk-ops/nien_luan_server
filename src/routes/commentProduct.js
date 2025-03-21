@@ -29,5 +29,8 @@ router.delete(
   commentProductController.deleteCommentProduct
 );
 
+router.post("/:commentId/:userId/like", commentProductController.likeComment);
+router.post("/:commentId/:userId/unlike", commentProductController.unlikeComment);
+
 router.delete("/", commentProductController.deleteAllCommentProduct);
 module.exports = router;

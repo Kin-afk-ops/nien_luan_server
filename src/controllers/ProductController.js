@@ -4,32 +4,32 @@ const Products = require("../models/Products");
 const {getAllChildCategories} = require('../services/categoryServices');
 
 const exampleProduct = new Products({
-  name: "Dell Latitus S2025 ProMax",
+  name: "Laptop HP ",
   sellerId: "10009",
   categories: {
     id: 10,
     name: "laptop",
     slug: "laptop",
   },
-  slug: "dell-latitude",
+  slug: "hp-laptop",
   condition: "new",
   quantity: 10,
   price: 10000000,
-  description: "Laptop Dell Latitude",
+  description: "Laptop HP",
   details: {
-    brand: "Dell",
-    ram: "4GB",
-    memory: "1TB",
-    cpu: "Intel Core i5",
+    brand: "HP",
+    ram: "8GB",
+    memory: "512TB",
+    cpu: "Intel Core i7",
     os: "Windows",
     battery: "5h",
-    color: "Đỏ",
-    size: "14 inch",
+    color: "Đen",
+    size: "13 inch",
   },
   images:{
     id: 1,
     url: [
-      "https://lamkhanh.com/wp-content/uploads/2022/02/laptop-dell-7480-300x300.jpg"
+      "https://cdnv2.tgdd.vn/mwg-static/tgdd/Products/Images/44/318165/hp-240-g8-i3-6l1a2pa-170225-104440-201-600x600.jpg"
     ]
   },
   discount: 0,
@@ -151,7 +151,6 @@ exports.getAllProductsByCategoryId = async (req, res) => {
         if(condition && condition != "all") {
             filter.condition = condition;
         }
-        console.log(req.query);
 
         Object.keys(req.query).forEach((key) => {
           if (!allowedStaticFilters.includes(key)) {

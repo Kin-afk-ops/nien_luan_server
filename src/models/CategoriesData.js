@@ -26,11 +26,12 @@ const categoriesData = [
   { id: 25, name: 'Đồ chơi tàu thủy', slug: 'do-choi-tau-thuy', parentId: 16 },
   { id: 26, name: 'Đồ chơi tàu du lịch', slug: 'do-choi-tau-du-lich', parentId: 16 },
   { id: 27, name: 'Đồ chơi tàu vũ trụ', slug: 'do-choi-tau-vu-tru', parentId: 16 },
-  {id: 28, name: "Sách ma thuật đen", slug: "sach-ma-thuat-den", parentId: 2},
-  {id: 29, name: "Đồ cho nam", slug:"do-cho-nam", parentId: 2},
-  {id: 30, name: "Đồ cho nữ", slug:"do-cho-nu", parentId: 2},
-  {id: 31, name: "Đồ cho trẻ em", slug:"do-cho-tre-em", parentId: 2},
-  {id: 32, name: "Đồ cho người già", slug:"do-cho-nguoi-gia", parentId: 2},
+  {id: 28, name: "Quần áo", slug: "quan-ao", parentId: 1},
+  {id: 29, name: "Sách ma thuật đen", slug: "sach-ma-thuat-den", parentId: 28},
+  {id: 30, name: "Đồ cho nam", slug:"do-cho-nam", parentId: 28},
+  {id: 31, name: "Đồ cho nữ", slug:"do-cho-nu", parentId: 28},
+  {id: 32, name: "Đồ cho trẻ em", slug:"do-cho-tre-em", parentId: 28},
+  {id: 33, name: "Đồ cho người già", slug:"do-cho-nguoi-gia", parentId: 28},
   
 ]
 
