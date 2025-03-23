@@ -49,13 +49,21 @@ exports.getCommentProductByProductId = async (req, res) => {
 
 exports.updateCommentProduct = async (req, res) => {
   try {
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ message: "Content is required" });
+    }
     const updateCommentProduct = await CommentProduct.findByIdAndUpdate(
       req.params.commentId,
       {
-        $set: req.body,
+        $set: {content},
       },
       { new: true }
     );
+    if (!updateCommentProduct) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
     res.status(200).json(updateCommentProduct);
   } catch (error) {
     res.status(500).json(error);
