@@ -13,6 +13,7 @@ const imageProductRoute = require("./src/routes/imageProduct");
 const commentProductRoute = require("./src/routes/commentProduct");
 const cartRoute = require("./src/routes/cart");
 const orderRoute = require("./src/routes/order");
+const categoryRoute = require("./src/routes/category.route");
 
 const app = express();
 
@@ -57,3 +58,4 @@ app.use("/api/imageProduct", imageProductRoute);
 app.use("/api/commentProduct", commentProductRoute);
 app.use("/api/cart", cartRoute);
 app.use("/api/order", orderRoute);
+app.use("/api/category", categoryRoute);

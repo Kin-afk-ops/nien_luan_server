@@ -36,3 +36,4 @@ const categoriesData = [
 ]
 
 module.exports = categoriesData;
+
