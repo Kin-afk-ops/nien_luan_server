@@ -30,21 +30,39 @@ exports.findUserPhone = async (req, res) => {
 };
 
 exports.findUserEmail = async (req, res) => {
-  const checkUser = await Users.findOne({
-    email: req.body.email,
-  });
-  const userRecord = await admin.auth().getUserByEmail(req.body.email);
+  try {
+    const checkUser = await Users.findOne({
+      email: req.body.email,
+    });
+    const userRecord = await admin.auth().getUserByEmail(req.body.email);
 
-  if (checkUser || userRecord) {
-    res.status(200).json({
-      message: "Tài khoản đã tồn tại",
-      check: true,
-    });
-  } else {
-    res.status(404).json({
-      message: "Tài khoản hợp lệ",
-      check: false,
-    });
+    if (req.body.firebaseMode) {
+      if (checkUser) {
+        res.status(200).json({
+          message: "Tài khoản đã tồn tại",
+          check: true,
+        });
+      } else {
+        res.status(404).json({
+          message: "Tài khoản hợp lệ",
+          check: false,
+        });
+      }
+    } else {
+      if (checkUser || userRecord) {
+        res.status(200).json({
+          message: "Tài khoản đã tồn tại",
+          check: true,
+        });
+      } else {
+        res.status(404).json({
+          message: "Tài khoản hợp lệ",
+          check: false,
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json(error);
   }
 };
 
