@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const { hashPassword, comparePassword } = require("../../hash/hashPassword");
 const sendOTPEmail = require("../../utils/sendEmail");
 const connectRedis = require("../../utils/connectRedis");
+const admin = require("../../utils/firebaseAdmin");
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
@@ -32,8 +33,9 @@ exports.findUserEmail = async (req, res) => {
   const checkUser = await Users.findOne({
     email: req.body.email,
   });
+  const userRecord = await admin.auth().getUserByEmail(req.body.email);
 
-  if (checkUser) {
+  if (checkUser || userRecord) {
     res.status(200).json({
       message: "Tài khoản đã tồn tại",
       check: true,
@@ -52,25 +54,32 @@ exports.registerUserPhone = async (req, res) => {
   });
 
   const newPassword = await hashPassword(req.body.password);
-  const otp = generateOTP();
-  const otpHash = await hashPassword(otp, 10);
+  // const otp = generateOTP();
+  // const otpHash = await hashPassword(otp, 10);
 
-  const redis = connectRedis();
+  // const redis = connectRedis();
 
-  pendingUsers = {
-    phone: req.body.phone,
-    password: newPassword,
-    otpHash,
-  };
+  // pendingUsers = {
+  //   phone: req.body.phone,
+  //   password: newPassword,
+  //   otpHash,
+  // };
   if (checkUser) {
     res.status(409).json({
       message: "User already exists",
     });
   } else {
     try {
-      res.status(200).json({
-        message: "OTP sent to phone number, please verify to complete signup",
+      const newUser = await Users({
+        email: "none",
+        phone: req.body.phone,
+        password: newPassword,
       });
+
+      const saveUser = await newUser.save();
+      const { password, ...others } = saveUser._doc;
+
+      res.status(200).json(others);
     } catch (err) {
       res.status(500).json(err);
     }

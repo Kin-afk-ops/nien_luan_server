@@ -6,6 +6,7 @@ const productController = require("../controllers/ProductController");
 const userController = require("../controllers/userController");
 const categoryController = require("../controllers/CategoriesController");
 const authController = require("../controllers/authController");
+const firebaseAuthController = require("../controllers/firebaseAuthController");
 const {
   verifyTokenUser,
   verifyTokenAnhAuthorizationUser,
@@ -52,6 +53,10 @@ router.get(
 //auth
 router.post("/auth/register/find/phone", authController.findUserPhone);
 router.post("/auth/register/find/email", authController.findUserEmail);
+router.post(
+  "/auth/register/find/firebase",
+  firebaseAuthController.findFirebaseUser
+);
 router.post("/auth/register/phone", authController.registerUserPhone);
 router.post("/auth/register/email", authController.registerUserEmail);
 router.post("/auth/login/phone", authController.loginUserPhone);
