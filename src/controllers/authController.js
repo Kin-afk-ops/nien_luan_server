@@ -5,6 +5,7 @@ const { hashPassword, comparePassword } = require("../../hash/hashPassword");
 const sendOTPEmail = require("../../utils/sendEmail");
 const connectRedis = require("../../utils/connectRedis");
 const admin = require("../../utils/firebaseAdmin");
+const FirebasePhoneNumber = require("../models/FirebasePhoneNumber");
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
@@ -309,6 +310,36 @@ exports.updateEmail = async (req, res) => {
   // }
 };
 
+exports.updatePhone = async (req, res) => {
+  if (req.body.firebaseIsAccount) {
+    const newFirebasePhoneUser = new FirebasePhoneNumber({
+      userId: req.params.id,
+      phone: req.body.phone,
+    });
+
+    try {
+      const saveUser = await newFirebasePhoneUser.save();
+
+      res.status(200).json(saveUser);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  } else {
+    try {
+      const updateUser = await Users.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: req.body,
+        },
+        { new: true }
+      );
+      res.status(200).json(updateUser);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  }
+};
+
 exports.verifyUpdateUser = async (req, res) => {
   const redis = connectRedis();
 
@@ -360,6 +391,22 @@ exports.updatePassword = async (req, res) => {
       { new: true }
     );
     res.status(200).json(updateUser);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+exports.getFirebasePhone = async (req, res) => {
+  try {
+    const userPhone = await FirebasePhoneNumber.findOne({
+      userId: req.params.id,
+    });
+
+    if (userPhone) {
+      res.status(200).json(userPhone);
+    } else {
+      res.status(404).json({ message: "Không có số điện thoại" });
+    }
   } catch (error) {
     res.status(500).json(error);
   }

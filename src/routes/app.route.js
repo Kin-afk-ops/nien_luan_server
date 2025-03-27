@@ -67,12 +67,24 @@ router.post(
   authController.updateEmail
 );
 
+router.post(
+  "/auth/update/phone/:id",
+  verifyTokenAnhAuthorizationUser,
+  authController.updatePhone
+);
+
 router.post("/products/createTest", productController.createTestProduct);
 
 router.put(
   "/auth/update/password/:id",
   verifyTokenAnhAuthorizationUser,
   authController.updatePassword
+);
+
+router.get(
+  "/auth/firebase/phone/:id",
+  verifyTokenAnhAuthorizationUser,
+  authController.getFirebasePhone
 );
 
 // user
