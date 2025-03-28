@@ -32,6 +32,22 @@ exports.readCart = async (req, res) => {
   }
 };
 
+exports.readCheckCart = async (req, res) => {
+  try {
+    const cart = await Cart.find({ buyerId: req.params.id, checked: true })
+      .populate("productId") // Lấy đầy đủ thông tin của productId
+      .exec();
+
+    if (cart) {
+      res.status(200).json(cart);
+    } else {
+      res.status(404).json({ message: "Không có sản phẩm trong giỏ hàng" });
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
 exports.updateCart = async (req, res) => {
   try {
     const updateCart = await Cart.findByIdAndUpdate(
