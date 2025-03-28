@@ -9,20 +9,25 @@ const verifyTokenUser = async (req, res, next) => {
   }
 
   const token = authHeader.split(" ")[1];
+  const firebaseIsAccount = authHeader.split(" ")[2];
 
   try {
     // Xác thực bằng JWT trước
-    jwt.verify(token, process.env.JWT_SEC, (err, user) => {
-      if (!err) {
-        req.user = user;
-        return next(); // ✅ Xác thực JWT thành công
-      }
-    });
 
-    // Nếu JWT không xác thực được, thử xác thực bằng Firebase
-    const decodedToken = await admin.auth().verifyIdToken(token);
-    req.user = decodedToken;
-    return next(); // ✅ Xác thực Firebase thành công
+    if (firebaseIsAccount === "firebaseIsNotAccount") {
+      jwt.verify(token, process.env.JWT_SEC, (err, user) => {
+        if (!err) {
+          req.user = user;
+
+          return next(); // ✅ Xác thực JWT thành công
+        }
+      });
+    } else {
+      // Nếu JWT không xác thực được, thử xác thực bằng Firebase
+      const decodedToken = await admin.auth().verifyIdToken(token);
+      req.user = decodedToken;
+      return next(); // ✅ Xác thực Firebase thành công
+    }
   } catch (error) {
     console.error("Error verifying token:", error);
     return res.status(403).json({ message: "Token is not valid!" });

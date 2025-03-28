@@ -61,13 +61,13 @@ router.post("/auth/register/phone", authController.registerUserPhone);
 router.post("/auth/register/email", authController.registerUserEmail);
 router.post("/auth/login/phone", authController.loginUserPhone);
 router.post("/auth/login/email", authController.loginUserEmail);
-router.post(
+router.put(
   "/auth/update/email/:id",
   verifyTokenAnhAuthorizationUser,
   authController.updateEmail
 );
 
-router.post(
+router.put(
   "/auth/update/phone/:id",
   verifyTokenAnhAuthorizationUser,
   authController.updatePhone
@@ -86,6 +86,8 @@ router.get(
   verifyTokenAnhAuthorizationUser,
   authController.getFirebasePhone
 );
+
+router.delete("/auth/firebase/phone/", authController.deleteFirebasePhone);
 
 // user
 router.get("/user", userController.getAllUser);
