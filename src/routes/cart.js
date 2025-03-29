@@ -25,6 +25,12 @@ router.delete(
 );
 
 router.delete(
+  "/deleteCheck/:id",
+  verifyTokenAnhAuthorizationUser,
+  cartController.deleteCheckedCart
+);
+
+router.delete(
   "/deleteAll/:userId",
   verifyTokenAnhAuthorizationUser,
   cartController.deleteAllCart

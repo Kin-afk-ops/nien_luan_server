@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Order = require("../models/Order");
+const Cart = require("../models/Cart");
 
 exports.createOrder = async (req, res) => {
   const newOrder = await Order({
@@ -8,6 +9,7 @@ exports.createOrder = async (req, res) => {
   });
   try {
     const saveCart = await newOrder.save();
+
     res
       .status(200)
       .json(

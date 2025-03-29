@@ -82,3 +82,15 @@ exports.deleteAllCart = async (req, res) => {
     res.status(500).json(error);
   }
 };
+
+exports.deleteCheckedCart = async (req, res) => {
+  try {
+    await Cart.deleteMany({
+      buyerId: req.params.id,
+      checked: true,
+    });
+    res.status(200).json("cart delete");
+  } catch (error) {
+    console.error("Error deleting checked items:", error);
+  }
+};
