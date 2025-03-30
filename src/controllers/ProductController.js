@@ -215,7 +215,9 @@ exports.createProduct = async (req, res) => {
   });
   try {
     const saveProduct = await newProduct.save();
-    res.status(200).json(saveProduct);
+    res
+      .status(200)
+      .json(await Products.findById(saveProduct._id).populate("addressId"));
   } catch (error) {
     res.status(500).json(error);
   }

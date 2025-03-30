@@ -53,7 +53,11 @@ const ProductSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
-    address: AddressInfoUser.schema,
+    addressId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "AddressInfoUser",
+      required: true,
+    },
     images: {
       id: {
         type: Number,

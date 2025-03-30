@@ -13,9 +13,15 @@ router.post(
 );
 
 router.get(
-  "/:userId",
+  "/product/:userId",
   verifyTokenAnhAuthorizationUser,
   orderController.readOrder
+);
+
+router.get(
+  "/search/:userId",
+  verifyTokenAnhAuthorizationUser,
+  orderController.readSearchOrder
 );
 
 router.put(
