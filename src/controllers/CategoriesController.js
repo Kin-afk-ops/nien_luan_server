@@ -63,9 +63,15 @@ exports.getAttributesOfCategory = async (req, res) => {
 
 exports.addCategoryAttributeDetail = async (req, res) => {
     try {
-        const cateAttributes = AttributeDetail(req.body);
-        cateAttributes.save();
-        res.status(201).json({ message: 'Thuộc tính đã được thêm!', attribute });
+        const count = await AttributeDetail.countDocuments();
+        const newAttributes = new AttributeDetail({
+            attributeId: count + 1,
+            label: req.body.label,
+            listDataTypes: req.body.listDataTypes,
+        })
+        // const cateAttributes = AttributeDetail(req.body);
+        newAttributes.save();
+        res.status(201).json({ message: 'Thuộc tính đã được thêm!', newAttributes });
     }catch(error) {
         console.error("Lỗi khi thêm danh mục", error);
         return res.status(500).json({ message: "Lỗi server khi thêm danh mục", error });
