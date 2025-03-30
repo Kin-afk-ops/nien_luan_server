@@ -8,6 +8,11 @@ const {
 
 router.post("/:id", verifyTokenAnhAuthorizationUser, cartController.createCart);
 router.get("/:id", verifyTokenAnhAuthorizationUser, cartController.readCart);
+router.get(
+  "/checked/:id",
+  verifyTokenAnhAuthorizationUser,
+  cartController.readCheckCart
+);
 router.put(
   "/:cartId/:userId",
   verifyTokenAnhAuthorizationUser,
@@ -17,6 +22,12 @@ router.delete(
   "/delete/:cartId/:userId",
   verifyTokenAnhAuthorizationUser,
   cartController.deleteCart
+);
+
+router.delete(
+  "/deleteCheck/:id",
+  verifyTokenAnhAuthorizationUser,
+  cartController.deleteCheckedCart
 );
 
 router.delete(

@@ -25,11 +25,14 @@ exports.createInfoUser = async (req, res) => {
 
 exports.readInfoUser = async (req, res) => {
   try {
-    const infoUser = await InfoUsers.findOne({ userId: req.params.id });
-    if (infoUser) {
-      res.status(200).json(infoUser);
+    if (req.body.firebaseIdAccount) {
     } else {
-      res.status(404).json({ message: "Không tìm thấy người dùng" });
+      const infoUser = await InfoUsers.findOne({ userId: req.params.id });
+      if (infoUser) {
+        res.status(200).json(infoUser);
+      } else {
+        res.status(404).json({ message: "Không tìm thấy người dùng" });
+      }
     }
   } catch (error) {
     res.status(500).json(error);

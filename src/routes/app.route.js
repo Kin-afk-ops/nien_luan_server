@@ -6,6 +6,7 @@ const productController = require("../controllers/ProductController");
 const userController = require("../controllers/userController");
 const categoryController = require("../controllers/CategoriesController");
 const authController = require("../controllers/authController");
+const firebaseAuthController = require("../controllers/firebaseAuthController");
 const {
   verifyTokenUser,
   verifyTokenAnhAuthorizationUser,
@@ -43,27 +44,50 @@ router.get(
   categoryController.getParentCategories
 );
 
-router.get("/categories/list/:id",categoryController.getListCategories);
-router.get("/categories/attributes/:id",categoryController.getAttributesOfCategory);
+router.get("/categories/list/:id", categoryController.getListCategories);
+router.get(
+  "/categories/attributes/:id",
+  categoryController.getAttributesOfCategory
+);
 
 //auth
 router.post("/auth/register/find/phone", authController.findUserPhone);
 router.post("/auth/register/find/email", authController.findUserEmail);
+router.post(
+  "/auth/register/find/firebase",
+  firebaseAuthController.findFirebaseUser
+);
 router.post("/auth/register/phone", authController.registerUserPhone);
 router.post("/auth/register/email", authController.registerUserEmail);
 router.post("/auth/login/phone", authController.loginUserPhone);
 router.post("/auth/login/email", authController.loginUserEmail);
-router.post(
+router.put(
   "/auth/update/email/:id",
   verifyTokenAnhAuthorizationUser,
   authController.updateEmail
 );
-router.post("/products/createTest",productController.createTestProduct);
+
+router.put(
+  "/auth/update/phone/:id",
+  verifyTokenAnhAuthorizationUser,
+  authController.updatePhone
+);
+
+router.post("/products/createTest", productController.createTestProduct);
+
 router.put(
   "/auth/update/password/:id",
   verifyTokenAnhAuthorizationUser,
   authController.updatePassword
 );
+
+router.get(
+  "/auth/firebase/phone/:id",
+  verifyTokenAnhAuthorizationUser,
+  authController.getFirebasePhone
+);
+
+router.delete("/auth/firebase/phone/", authController.deleteFirebasePhone);
 
 // user
 router.get("/user", userController.getAllUser);
@@ -86,7 +110,8 @@ router.post(
 );
 
 router.delete("/image/remove/:id", imageController.removeImage);
-router.get("/getAllProductTest",productController.getAllProducts);
+
+router.get("/getAllProductTest", productController.getAllProducts);
 
 // InfoUser
 

@@ -4,6 +4,8 @@ const bcrypt = require("bcryptjs");
 const { hashPassword, comparePassword } = require("../../hash/hashPassword");
 const sendOTPEmail = require("../../utils/sendEmail");
 const connectRedis = require("../../utils/connectRedis");
+const admin = require("../../utils/firebaseAdmin");
+const FirebasePhoneNumber = require("../models/FirebasePhoneNumber");
 
 const generateOTP = () => {
   return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
@@ -11,38 +13,64 @@ const generateOTP = () => {
 
 let pendingUsers = {};
 exports.findUserPhone = async (req, res) => {
-  const checkUser = await Users.findOne({
-    phone: req.body.phone,
-  });
+  try {
+    const checkUser = await Users.findOne({
+      phone: req.body.phone,
+    });
+    const checkFirebaseUser = await FirebasePhoneNumber.findOne({
+      phone: req.body.phone,
+    });
 
-  if (checkUser) {
-    res.status(200).json({
-      message: "Tài khoản đã tồn tại",
-      check: true,
-    });
-  } else {
-    res.status(404).json({
-      message: "Tài khoản hợp lệ",
-      check: false,
-    });
+    if (checkUser || checkFirebaseUser) {
+      res.status(200).json({
+        message: "Tài khoản đã tồn tại",
+        check: true,
+      });
+    } else {
+      res.status(404).json({
+        message: "Tài khoản hợp lệ",
+        check: false,
+      });
+    }
+  } catch (error) {
+    res.status(500).json(error);
   }
 };
 
 exports.findUserEmail = async (req, res) => {
-  const checkUser = await Users.findOne({
-    email: req.body.email,
-  });
+  try {
+    const checkUser = await Users.findOne({
+      email: req.body.email,
+    });
+    const userRecord = await admin.auth().getUserByEmail(req.body.email);
 
-  if (checkUser) {
-    res.status(200).json({
-      message: "Tài khoản đã tồn tại",
-      check: true,
-    });
-  } else {
-    res.status(404).json({
-      message: "Tài khoản hợp lệ",
-      check: false,
-    });
+    if (req.body.firebaseMode) {
+      if (checkUser) {
+        res.status(200).json({
+          message: "Tài khoản đã tồn tại",
+          check: true,
+        });
+      } else {
+        res.status(404).json({
+          message: "Tài khoản không hợp lệ",
+          check: false,
+        });
+      }
+    } else {
+      if (checkUser || userRecord) {
+        res.status(200).json({
+          message: "Tài khoản đã tồn tại",
+          check: true,
+        });
+      } else {
+        res.status(404).json({
+          message: "Tài khoản hợp lệ",
+          check: false,
+        });
+      }
+    }
+  } catch (error) {
+    res.status(500).json(error);
   }
 };
 
@@ -52,25 +80,32 @@ exports.registerUserPhone = async (req, res) => {
   });
 
   const newPassword = await hashPassword(req.body.password);
-  const otp = generateOTP();
-  const otpHash = await hashPassword(otp, 10);
+  // const otp = generateOTP();
+  // const otpHash = await hashPassword(otp, 10);
 
-  const redis = connectRedis();
+  // const redis = connectRedis();
 
-  pendingUsers = {
-    phone: req.body.phone,
-    password: newPassword,
-    otpHash,
-  };
+  // pendingUsers = {
+  //   phone: req.body.phone,
+  //   password: newPassword,
+  //   otpHash,
+  // };
   if (checkUser) {
     res.status(409).json({
       message: "User already exists",
     });
   } else {
     try {
-      res.status(200).json({
-        message: "OTP sent to phone number, please verify to complete signup",
+      const newUser = await Users({
+        email: "none",
+        phone: req.body.phone,
+        password: newPassword,
       });
+
+      const saveUser = await newUser.save();
+      const { password, ...others } = saveUser._doc;
+
+      res.status(200).json(others);
     } catch (err) {
       res.status(500).json(err);
     }
@@ -282,6 +317,53 @@ exports.updateEmail = async (req, res) => {
   // }
 };
 
+exports.updatePhone = async (req, res) => {
+  if (req.body.firebaseIsAccount) {
+    if (req.body.createMode) {
+      const newFirebasePhoneUser = new FirebasePhoneNumber({
+        userId: req.params.id,
+        phone: req.body.phone,
+      });
+
+      try {
+        const saveUser = await newFirebasePhoneUser.save();
+
+        res.status(200).json(saveUser);
+      } catch (error) {
+        res.status(500).json(error);
+      }
+    } else {
+      try {
+        const updateUser = await FirebasePhoneNumber.findOneAndUpdate(
+          {
+            userId: req.params.id,
+          },
+          {
+            $set: req.body,
+          },
+          { new: true }
+        );
+        res.status(200).json(updateUser);
+      } catch (error) {
+        res.status(500).json(error);
+      }
+    }
+  } else {
+    try {
+      const updateUser = await Users.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: req.body,
+        },
+        { new: true }
+      );
+      res.status(200).json(updateUser);
+    } catch (error) {
+      res.status(500).json(error);
+    }
+  }
+};
+
 exports.verifyUpdateUser = async (req, res) => {
   const redis = connectRedis();
 
@@ -333,6 +415,31 @@ exports.updatePassword = async (req, res) => {
       { new: true }
     );
     res.status(200).json(updateUser);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+exports.getFirebasePhone = async (req, res) => {
+  try {
+    const userPhone = await FirebasePhoneNumber.findOne({
+      userId: req.params.id,
+    });
+
+    if (userPhone) {
+      res.status(200).json(userPhone);
+    } else {
+      res.status(404).json({ message: "Không có số điện thoại" });
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
+exports.deleteFirebasePhone = async (req, res) => {
+  try {
+    await FirebasePhoneNumber.deleteMany();
+    res.status(200).json("firebase phone has been deleted...");
   } catch (error) {
     res.status(500).json(error);
   }

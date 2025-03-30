@@ -8,11 +8,11 @@ const {
 
 router.post("/:id", verifyTokenUser, ProductController.createProduct);
 router.get(
-  "/:id",
+  "/seller/:id",
   verifyTokenAnhAuthorizationUser,
   ProductController.getProductBySellerId
 );
 
-router.get("/categories/:id", ProductController.getProductByCategories);
+router.get("/search", verifyTokenUser, ProductController.getSearchProducts);
 
 module.exports = router;
