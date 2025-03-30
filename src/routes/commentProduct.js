@@ -29,5 +29,8 @@ router.delete(
   commentProductController.deleteCommentProduct
 );
 
+router.post("/:commentId/:userId/like",verifyTokenAnhAuthorizationUser, commentProductController.likeComment);
+router.post("/:commentId/:userId/unlike",verifyTokenAnhAuthorizationUser, commentProductController.unlikeComment);
+
 router.delete("/", commentProductController.deleteAllCommentProduct);
 module.exports = router;

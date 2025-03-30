@@ -1,4 +1,8 @@
 const categoriesData = require("../models/CategoriesData");
+const cateData = require("../models/CateData");
+const { getAllChildCategoriesInfo } = require("../services/categoryServices");
+const AttributeDetail = require("../models/CateAttributeDetail");
+const Category = require("../models/Category");
 
 exports.getParentCategories = (req, res) => {
   const categoryId = parseInt(req.params.id);
@@ -68,5 +72,66 @@ exports.getAttributesOfCategory = async (req, res) => {
     return res
       .status(500)
       .json({ message: "Lỗi server khi lấy thông tin danh mục", error });
+  }
+};
+
+exports.addCategoryAttributeDetail = async (req, res) => {
+  try {
+    const count = await AttributeDetail.countDocuments();
+    const newAttributes = new AttributeDetail({
+      attributeId: count + 1,
+      label: req.body.label,
+      listDataTypes: req.body.listDataTypes,
+    });
+    // const cateAttributes = AttributeDetail(req.body);
+    newAttributes.save();
+    res
+      .status(201)
+      .json({ message: "Thuộc tính đã được thêm!", newAttributes });
+  } catch (error) {
+    console.error("Lỗi khi thêm danh mục", error);
+    return res
+      .status(500)
+      .json({ message: "Lỗi server khi thêm danh mục", error });
+  }
+};
+
+exports.addCategory = async (req, res) => {
+  try {
+    const category = Category(req.body);
+    category.save();
+    res.status(201).json({ message: "Danh mục đã được thêm!", category });
+  } catch (error) {
+    console.error("Lỗi khi thêm danh mục", error);
+    return res
+      .status(500)
+      .json({ message: "Lỗi server khi thêm danh mục", error });
+  }
+};
+
+exports.getAllCategories = async (req, res) => {
+  try {
+    // const categories = await categoriesData.find();
+    res.json(categoriesData);
+  } catch (error) {
+    console.error("L��i khi lấy tất cả danh mục", error);
+    return res
+      .status(500)
+      .json({ message: "L��i server khi lấy tất cả danh mục", error });
+  }
+};
+
+exports.getAllCategoriesAttributes = async (req, res) => {
+  try {
+    // const categoriesAttributes = await AttributeDetail.find();
+    res.json(cateData);
+  } catch (error) {
+    console.error("L��i khi lấy tất cả thông tin danh mục", error);
+    return res
+      .status(500)
+      .json({
+        message: "L��i server khi lấy tất cả thông tin danh mục",
+        error,
+      });
   }
 };

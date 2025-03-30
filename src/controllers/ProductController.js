@@ -4,38 +4,38 @@ const Products = require("../models/Products");
 const { getAllChildCategories } = require("../services/categoryServices");
 
 const exampleProduct = new Products({
-  name: "Dell Latitus S2025 ProMax",
+  name: "Laptop HP 14s-fq1080AU",
   sellerId: "10009",
   categories: {
     id: 10,
     name: "laptop",
     slug: "laptop",
   },
-  slug: "dell-latitude",
+  slug: "hp-laptop",
   condition: "new",
   quantity: 10,
-  price: 10000000,
-  description: "Laptop Dell Latitude",
+  price: 9500000,
+  description: "Laptop HP 14s-fq1080AU",
   details: {
-    brand: "Dell",
+    brand: "HP",
     ram: "4GB",
-    memory: "1TB",
-    cpu: "Intel Core i5",
+    memory: "256TB",
+    cpu: "Intel Core i3",
     os: "Windows",
     battery: "5h",
-    color: "Đỏ",
+    color: "Bạc",
     size: "14 inch",
   },
   images: {
     id: 1,
     url: [
-      "https://lamkhanh.com/wp-content/uploads/2022/02/laptop-dell-7480-300x300.jpg",
+      "https://laptop360.net/wp-content/uploads/2023/02/Laptop-HP-14s-fq1080AU-2.jpg"
     ],
   },
   discount: 0,
   isFreeShip: true,
   address: {
-    province: "Hà Nội",
+    province: "Hồ Chí Minh",
   },
 });
 
@@ -130,7 +130,7 @@ exports.getAllProductsByCategoryId = async (req, res) => {
   try {
     const categoryId = parseInt(req.params.id, 10);
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 48;
+    const limit = parseInt(req.query.limit) || 8;
     const sort = req.query.sort || "newest";
     const minPrice = req.query.minPrice ? parseInt(req.query.minPrice) : 0;
     const maxPrice = req.query.maxPrice
@@ -138,7 +138,7 @@ exports.getAllProductsByCategoryId = async (req, res) => {
       : 1000000000;
     const skip = (page - 1) * limit; // Bỏ qua các sản phẩm đã duyệt ở trước
     const condition = req.query.conditions;
-    const size = req.query.size;
+    const isFreeShip = req.query.isFreeShip;
 
     if (isNaN(categoryId)) {
       return res.status(404).json({ message: "ID danh mục không hợp lệ" });
@@ -150,6 +150,7 @@ exports.getAllProductsByCategoryId = async (req, res) => {
       "minPrice",
       "maxPrice",
       "conditions",
+      "isFreeShip",
     ];
     let hasDynamicFilters = false;
 
@@ -157,11 +158,13 @@ exports.getAllProductsByCategoryId = async (req, res) => {
     const filter = {
       "categories.id": { $in: validateCategoryIds },
       price: { $gte: minPrice, $lte: maxPrice },
+
     };
     if (condition && condition != "all") {
       filter.condition = condition;
     }
-    console.log(req.query);
+
+    
 
     Object.keys(req.query).forEach((key) => {
       if (!allowedStaticFilters.includes(key)) {
@@ -175,11 +178,18 @@ exports.getAllProductsByCategoryId = async (req, res) => {
         hasDynamicFilters = true;
       }
     });
+    
+    if(isFreeShip === 'freeship') {
+      filter.isFreeShip = true;
+    }
 
     let sortOption = { createdAt: -1 }; // Mặc định sắp xếp mới nhất
     if (sort === "price_asc") sortOption = { price: 1 };
     if (sort === "price_desc") sortOption = { price: -1 };
     if (sort === "free") filter.price = 0;
+
+    
+
 
     const products = await Products.find(filter)
       .sort(sortOption)
@@ -193,7 +203,7 @@ exports.getAllProductsByCategoryId = async (req, res) => {
         .json({ message: "Sản phẩm thuộc danh mục không tồn tại" });
     return res.json({
       products,
-      totalPages: Math.ceil(products.length / limit),
+      totalPages: Math.ceil(totalProducts / limit),
       totalProducts,
       page,
     }); // Trả về tất cả sản phẩm theo danh mục
