@@ -14,7 +14,7 @@ exports.createOrder = async (req, res) => {
     const populatedOrders = await Order.find({
       _id: { $in: savedOrders.map((o) => o._id) },
     })
-      .populate("products.productId")
+      .populate("productId")
       .populate("addressId")
       .exec();
 
@@ -38,25 +38,148 @@ exports.readOrder = async (req, res) => {
       total = await Order.find({
         buyerId: req.params.userId,
       }).countDocuments();
-      order = await Order.find({
-        buyerId: req.params.userId,
-      })
+      order = await Order.aggregate([
+        {
+          $match: { buyerId: req.params.userId },
+        },
+        // Lookup lấy product từ productId
+        {
+          $lookup: {
+            from: "products", // Collection của Product
+            localField: "productId",
+            foreignField: "_id",
+            as: "product",
+          },
+        },
+        { $unwind: "$product" },
+
+        // Lookup lấy địa chỉ từ product.addressId
+        {
+          $lookup: {
+            from: "addressinfousers", // Collection của Address
+            localField: "product.addressId",
+            foreignField: "_id",
+            as: "product.addressInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$product.addressInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        // Lookup lấy seller từ product.sellerId
+        {
+          $lookup: {
+            from: "infousers", // Collection của Seller
+            localField: "product.sellerId",
+            foreignField: "userId",
+            as: "product.sellerInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$product.sellerInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        // Lookup lấy địa chỉ từ addressId bên ngoài
+        {
+          $lookup: {
+            from: "addressinfousers", // Collection của Address
+            localField: "addressId",
+            foreignField: "_id",
+            as: "externalAddress",
+          },
+        },
+        {
+          $unwind: {
+            path: "$externalAddress",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $sort: { createdAt: -1 }, // Sắp xếp theo thời gian tạo
+        },
+      ])
         .skip(skipItem)
-        .limit(limit)
-        .populate("products.productId")
-        .populate("addressId")
-        .exec();
+        .limit(limit);
     } else {
       total = await Order.find({
         buyerId: req.params.userId,
         status: status,
       }).countDocuments();
-      order = await Order.find({ buyerId: req.params.userId, status: status })
+      order = await Order.aggregate([
+        {
+          $match: { buyerId: req.params.userId },
+          $match: { status: status },
+        },
+        // Lookup lấy product từ productId
+        {
+          $lookup: {
+            from: "products", // Collection của Product
+            localField: "productId",
+            foreignField: "_id",
+            as: "product",
+          },
+        },
+        { $unwind: "$product" },
+
+        // Lookup lấy địa chỉ từ product.addressId
+        {
+          $lookup: {
+            from: "addressinfousers", // Collection của Address
+            localField: "product.addressId",
+            foreignField: "_id",
+            as: "product.addressInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$product.addressInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        // Lookup lấy seller từ product.sellerId
+        {
+          $lookup: {
+            from: "infousers", // Collection của Seller
+            localField: "product.sellerId",
+            foreignField: "userId",
+            as: "product.sellerInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$product.sellerInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        // Lookup lấy địa chỉ từ addressId bên ngoài
+        {
+          $lookup: {
+            from: "addressinfousers", // Collection của Address
+            localField: "addressId",
+            foreignField: "_id",
+            as: "externalAddress",
+          },
+        },
+        {
+          $unwind: {
+            path: "$externalAddress",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $sort: { createdAt: -1 }, // Sắp xếp theo thời gian tạo
+        },
+      ])
         .skip(skipItem)
-        .limit(limit)
-        .populate("products.productId")
-        .populate("addressId")
-        .exec();
+        .limit(limit);
     }
 
     if (order) {
@@ -89,23 +212,175 @@ exports.readSearchOrder = async (req, res) => {
       total = await Order.find({
         buyerId: req.params.userId,
       }).countDocuments();
-      order = await Order.find({ buyerId: req.params.userId })
+      order = await Order.aggregate([
+        {
+          $match: { buyerId: req.params.userId },
+        },
+        // Lookup lấy product từ productId
+        {
+          $lookup: {
+            from: "products", // Collection của Product
+            localField: "productId",
+            foreignField: "_id",
+            as: "product",
+          },
+        },
+        { $unwind: "$product" },
+
+        // Lookup lấy địa chỉ từ product.addressId
+        {
+          $lookup: {
+            from: "addressinfousers", // Collection của Address
+            localField: "product.addressId",
+            foreignField: "_id",
+            as: "product.addressInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$product.addressInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        // Lookup lấy seller từ product.sellerId
+        {
+          $lookup: {
+            from: "infousers", // Collection của Seller
+            localField: "product.sellerId",
+            foreignField: "userId",
+            as: "product.sellerInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$product.sellerInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        // Lookup lấy địa chỉ từ addressId bên ngoài
+        {
+          $lookup: {
+            from: "addressinfousers", // Collection của Address
+            localField: "addressId",
+            foreignField: "_id",
+            as: "externalAddress",
+          },
+        },
+        {
+          $unwind: {
+            path: "$externalAddress",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $match: {
+            $or: [
+              { "product.name": { $regex: searchValue, $options: "i" } },
+              {
+                "product.sellerInfo.name": {
+                  $regex: searchValue,
+                  $options: "i",
+                },
+              },
+            ],
+          },
+        },
+        {
+          $sort: { createdAt: -1 }, // Sắp xếp theo thời gian tạo
+        },
+      ])
         .skip(skipItem)
-        .limit(limit)
-        .populate("products.productId")
-        .populate("addressId")
-        .exec();
+        .limit(limit);
     } else {
       total = await Order.find({
         buyerId: req.params.userId,
         status: status,
       }).countDocuments();
-      order = await Order.find({ buyerId: req.params.userId, status: status })
+      order = await Order.aggregate([
+        {
+          $match: { buyerId: req.params.userId },
+          $match: { status: status },
+        },
+        // Lookup lấy product từ productId
+        {
+          $lookup: {
+            from: "products", // Collection của Product
+            localField: "productId",
+            foreignField: "_id",
+            as: "product",
+          },
+        },
+        { $unwind: "$product" },
+
+        // Lookup lấy địa chỉ từ product.addressId
+        {
+          $lookup: {
+            from: "addressinfousers", // Collection của Address
+            localField: "product.addressId",
+            foreignField: "_id",
+            as: "product.addressInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$product.addressInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        // Lookup lấy seller từ product.sellerId
+        {
+          $lookup: {
+            from: "infousers", // Collection của Seller
+            localField: "product.sellerId",
+            foreignField: "userId",
+            as: "product.sellerInfo",
+          },
+        },
+        {
+          $unwind: {
+            path: "$product.sellerInfo",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        // Lookup lấy địa chỉ từ addressId bên ngoài
+        {
+          $lookup: {
+            from: "addressinfousers", // Collection của Address
+            localField: "addressId",
+            foreignField: "_id",
+            as: "externalAddress",
+          },
+        },
+        {
+          $unwind: {
+            path: "$externalAddress",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+
+        {
+          $match: {
+            $or: [
+              { "product.name": { $regex: searchValue, $options: "i" } },
+              {
+                "product.sellerInfo.name": {
+                  $regex: searchValue,
+                  $options: "i",
+                },
+              },
+            ],
+          },
+        },
+        {
+          $sort: { createdAt: -1 }, // Sắp xếp theo thời gian tạo
+        },
+      ])
         .skip(skipItem)
-        .limit(limit)
-        .populate("products.productId")
-        .populate("addressId")
-        .exec();
+        .limit(limit);
     }
 
     if (order) {
@@ -131,11 +406,11 @@ exports.updateOrder = async (req, res) => {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng." });
     }
 
-    if (order.status !== "Đang chuẩn bị hàng") {
-      return res
-        .status(400)
-        .json({ message: "Không thể thay đổi đơn hàng khi đã được xử lý." });
-    }
+    // if (order.status === "Đang chuẩn bị hàng") {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Không thể thay đổi đơn hàng khi đã được xử lý." });
+    // }
 
     const updateCart = await Order.findByIdAndUpdate(
       req.params.orderId,
@@ -143,10 +418,8 @@ exports.updateOrder = async (req, res) => {
         $set: req.body,
       },
       { new: true }
-    )
-      .populate("products.productId")
-      .populate("addressId")
-      .exec();
+    );
+
     res.status(200).json(updateCart);
   } catch (error) {
     res.status(500).json(error);

@@ -26,7 +26,7 @@ router.get(
 
 router.put(
   "/:orderId/:userId",
-
+  verifyTokenAnhAuthorizationUser,
   orderController.updateOrder
 );
 

@@ -10,6 +10,7 @@ const ProductSchema = new mongoose.Schema(
     sellerId: {
       type: String,
       required: true,
+      ref: "InfoUser",
     },
 
     categories: {
@@ -79,7 +80,7 @@ const ProductSchema = new mongoose.Schema(
     sold: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   { timestamps: true }
 );
