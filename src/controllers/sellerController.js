@@ -38,6 +38,16 @@ exports.readSellerOrder = async (req, res) => {
         },
         { $unwind: "$product" },
 
+        {
+          $lookup: {
+            from: "infousers", // Collection của Product
+            localField: "buyerId",
+            foreignField: "userId",
+            as: "infoUser",
+          },
+        },
+        { $unwind: "$infoUser" },
+
         // Lookup lấy địa chỉ từ product.addressId
         {
           $lookup: {
@@ -130,6 +140,15 @@ exports.readSellerOrder = async (req, res) => {
           },
         },
         { $unwind: "$product" },
+        {
+          $lookup: {
+            from: "infousers", // Collection của Product
+            localField: "buyerId",
+            foreignField: "userId",
+            as: "infoUser",
+          },
+        },
+        { $unwind: "$infoUser" },
 
         // Lookup lấy địa chỉ từ product.addressId
         {
