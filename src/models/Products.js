@@ -79,6 +79,10 @@ const ProductSchema = new mongoose.Schema(
     sold: {
       type: Boolean,
       default: false,
+    },
+    address: {
+      type: AddressInfoUser.schema,
+      required: true,
     }
   },
   { timestamps: true }

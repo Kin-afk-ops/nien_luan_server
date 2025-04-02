@@ -23,6 +23,8 @@ router.get("/categories", (req, res) => {
 });
 
 router.get("/products/:id", productController.getProductById);
+router.get("/products/freeProduct/get", productController.getFreeProduct);
+router.get("/products/outstanding/:id",productController.getOutStandingProductByCateId)
 
 router.get(
   "/products/:categorySlug/:productSlug/:id",

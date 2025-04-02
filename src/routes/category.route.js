@@ -7,5 +7,6 @@ router.get("/getallCategories",CategoriesController.getAllCategories);
 router.get("/getallCateAttr",CategoriesController.getAllCategoriesAttributes);
 router.post("/addAttr",CategoriesController.addCategoryAttributeDetail);
 router.put("/updateAttr/:attributeId",CategoriesController.updateCategoriesAttributes);
+router.get("/getAttrByCateId/:id",CategoriesController.getAttributeByCategoryId);
 
 module.exports = router;
