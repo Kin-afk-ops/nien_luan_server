@@ -49,6 +49,16 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    ratingStar: {
+      count: {
+        type: Number,
+        default: 0,
+      },
+      average: {
+        type: Number,
+        default: 0,
+      }
+    },
     details: {
       type: mongoose.Schema.Types.Mixed,
       default: {},

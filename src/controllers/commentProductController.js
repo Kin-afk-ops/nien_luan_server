@@ -12,6 +12,19 @@ exports.createCommentProduct = async (req, res) => {
     });
     try {
       const saveProduct = await newCommentProduct.save();
+      const currentCount = product.ratingStar.count || 0;
+      const currentRating = product.ratingStar.rating || 0;
+      const newCount = currentCount + 1;
+      const newRating = ((currentRating * currentCount) + req.body.ratingStar) / newCount;
+      await Products.findByIdAndUpdate(req.params.productId, {
+        $set: {
+          ratingStar: {
+            count: newCount,
+            rating: newRating,
+          },
+        },
+      });
+      
       res.status(200).json(saveProduct);
     } catch (error) {
       res.status(500).json(error);
