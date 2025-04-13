@@ -163,7 +163,6 @@ exports.getAllProductsByCategoryId = async (req, res) => {
     const filter = {
       "categories.id": { $in: validateCategoryIds },
       price: { $gte: minPrice, $lte: maxPrice },
-
     };
     if (condition && condition != "all") {
       filter.condition = condition;
@@ -180,8 +179,8 @@ exports.getAllProductsByCategoryId = async (req, res) => {
         hasDynamicFilters = true;
       }
     });
-    
-    if(isFreeShip === 'freeship') {
+
+    if (isFreeShip === "freeship") {
       filter.isFreeShip = true;
     }
 
@@ -201,9 +200,6 @@ exports.getAllProductsByCategoryId = async (req, res) => {
     if (sort === "price_asc") sortOption = { price: 1 };
     if (sort === "price_desc") sortOption = { price: -1 };
     if (sort === "free") filter.price = 0;
-
-    
-
 
     const products = await Products.find(filter)
       .sort(sortOption)
@@ -258,9 +254,36 @@ exports.createTestProduct = async (req, res) => {
 
 exports.getProductBySellerId = async (req, res) => {
   try {
-    const product = await Products.find({ sellerId: req.params.id }).sort({
-      createdAt: -1,
-    });
+    const product = await Products.aggregate([
+      {
+        $match: { sellerId: req.params.id }, // Lọc theo sellerId
+      },
+      {
+        $lookup: {
+          from: "infousers", // Tên collection của InfoUser trong MongoDB (chữ thường, số nhiều)
+          localField: "sellerId",
+          foreignField: "userId",
+          as: "sellerInfo",
+        },
+      },
+      {
+        $unwind: "$sellerInfo", // Giải nén nếu chỉ có một kết quả
+      },
+      {
+        $lookup: {
+          from: "addressinfousers", // Tên collection của AddressInfoUser (chữ thường, số nhiều)
+          localField: "addressId",
+          foreignField: "_id",
+          as: "addressInfo",
+        },
+      },
+      {
+        $unwind: "$addressInfo", // Giải nén địa chỉ (nếu có)
+      },
+      {
+        $sort: { createdAt: -1 }, // Sắp xếp theo thời gian tạo
+      },
+    ]);
 
     res.status(200).json(product);
   } catch (error) {

@@ -7,6 +7,7 @@ const OrderSchema = new mongoose.Schema(
     buyerId: {
       type: String,
       required: true,
+      ref: "InfoUser",
     },
     addressId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -30,16 +31,15 @@ const OrderSchema = new mongoose.Schema(
       required: true,
     },
 
-    products: {
-      productId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
-      },
-      quantity: {
-        type: Number,
-        required: true,
-      },
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Product",
+      required: true,
+    },
+
+    quantity: {
+      type: Number,
+      required: true,
     },
 
     paymentMethod: {

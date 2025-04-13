@@ -24,6 +24,7 @@ const verifyTokenUser = async (req, res, next) => {
       });
     } else {
       // Nếu JWT không xác thực được, thử xác thực bằng Firebase
+
       const decodedToken = await admin.auth().verifyIdToken(token);
       req.user = decodedToken;
       return next(); // ✅ Xác thực Firebase thành công

@@ -8,6 +8,7 @@ const {
 
 router.post(
   "/:productId/:userId",
+  verifyTokenAnhAuthorizationUser,
   commentProductController.createCommentProduct
 );
 
