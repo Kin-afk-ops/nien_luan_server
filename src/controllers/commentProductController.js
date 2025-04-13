@@ -20,7 +20,7 @@ exports.createCommentProduct = async (req, res) => {
         $set: {
           ratingStar: {
             count: newCount,
-            rating: newRating,
+            average: newRating,
           },
         },
       });
