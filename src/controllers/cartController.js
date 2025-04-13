@@ -8,9 +8,7 @@ exports.createCart = async (req, res) => {
   });
   try {
     const saveCart = await newCart.save();
-    res
-      .status(200)
-      .json(await Cart.findById(saveCart._id).populate("productId"));
+    res.status(200).json(saveCart);
   } catch (error) {
     res.status(500).json(error);
   }
@@ -18,9 +16,57 @@ exports.createCart = async (req, res) => {
 
 exports.readCart = async (req, res) => {
   try {
-    const cart = await Cart.find({ buyerId: req.params.id })
-      .populate("productId") // Lấy đầy đủ thông tin của productId
-      .exec();
+    const cart = await Cart.aggregate([
+      {
+        $match: { buyerId: req.params.id },
+      },
+      // Lookup lấy product từ productId
+      {
+        $lookup: {
+          from: "products", // Collection của Product
+          localField: "productId",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+      { $unwind: "$product" },
+
+      // Lookup lấy địa chỉ từ product.addressId
+      {
+        $lookup: {
+          from: "addressinfousers", // Collection của Address
+          localField: "product.addressId",
+          foreignField: "_id",
+          as: "product.addressInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$product.addressInfo",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // Lookup lấy seller từ product.sellerId
+      {
+        $lookup: {
+          from: "infousers", // Collection của Seller
+          localField: "product.sellerId",
+          foreignField: "userId",
+          as: "product.sellerInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$product.sellerInfo",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $sort: { createdAt: -1 }, // Sắp xếp theo thời gian tạo
+      },
+    ]);
 
     if (cart) {
       res.status(200).json(cart);

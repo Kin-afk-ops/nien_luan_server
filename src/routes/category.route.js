@@ -1,11 +1,18 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const CategoriesController = require("../controllers/CategoriesController");
 
-router.post("/addCate",CategoriesController.addCategory);
-router.get("/getallCategories",CategoriesController.getAllCategories);
-router.get("/getallCateAttr",CategoriesController.getAllCategoriesAttributes);
-router.post("/addAttr",CategoriesController.addCategoryAttributeDetail);
-router.put("/updateAttr/:attributeId",CategoriesController.updateCategoriesAttributes);
+router.post("/addCate", CategoriesController.addCategory);
+router.get("/getallCategories", CategoriesController.getAllCategories);
+router.get("/getallCateAttr", CategoriesController.getAllCategoriesAttributes);
+router.get(
+  "/getAttributesOfCategory/:attributeId",
+  CategoriesController.getAttributesOfCategory
+);
+router.post("/addAttr", CategoriesController.addCategoryAttributeDetail);
+router.put(
+  "/updateAttr/:attributeId",
+  CategoriesController.updateCategoriesAttributes
+);
 
 module.exports = router;

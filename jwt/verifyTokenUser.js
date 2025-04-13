@@ -50,7 +50,18 @@ const verifyTokenAnhAuthorizationUser = (req, res, next) => {
   });
 };
 
+const verifyTokenAnhAuthorizationAdmin = (req, res, next) => {
+  verifyTokenUser(req, res, async () => {
+    if (req.user.phone === "admin") {
+      next();
+    } else {
+      res.status(403).json("You are not allowed to do that!");
+    }
+  });
+};
+
 module.exports = {
   verifyTokenUser,
   verifyTokenAnhAuthorizationUser,
+  verifyTokenAnhAuthorizationAdmin,
 };
