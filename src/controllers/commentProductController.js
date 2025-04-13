@@ -45,7 +45,13 @@ exports.getCommentProductByProductId = async (req, res) => {
         const userInfo = await InfoUsers.findOne({ userId: comment.userId }); // Tìm userInfo dựa trên userId
         return {
           ...comment.toObject(),
-          user: userInfo ? { name: userInfo.name, avatar: userInfo.avatar, email: userInfo.email } : null,
+          user: userInfo
+            ? {
+                name: userInfo.name,
+                avatar: userInfo.avatar,
+                email: userInfo.email,
+              }
+            : null, // Vẫn thêm trường user, nhưng giá trị là null nếu không có
         };
       })
     );

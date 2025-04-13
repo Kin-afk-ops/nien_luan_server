@@ -7,12 +7,15 @@ const {
 } = require("../../jwt/verifyTokenUser");
 
 router.post("/:id", verifyTokenUser, ProductController.createProduct);
+router.put("/:id", verifyTokenUser, ProductController.updateProduct);
 router.get(
   "/seller/:id",
   verifyTokenAnhAuthorizationUser,
   ProductController.getProductBySellerId
 );
 
-router.get("/search", verifyTokenUser, ProductController.getSearchProducts);
+router.get("/oneProduct/:id", ProductController.getProductForEdit);
+
+router.get("/search", ProductController.getSearchProducts);
 
 module.exports = router;

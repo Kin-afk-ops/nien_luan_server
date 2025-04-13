@@ -24,7 +24,7 @@ const ProductSchema = new mongoose.Schema(
         type: String,
       },
       parentId: {
-        type: String,
+        type: Number,
         default: null,
       },
     },
@@ -38,6 +38,7 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
     quantity: {
       type: Number,
       required: true,
@@ -69,20 +70,19 @@ const ProductSchema = new mongoose.Schema(
       ref: "AddressInfoUser",
       required: true,
     },
-    images: {
-      id: {
-        type: Number,
+    image: {
+      publicId: {
+        type: String,
       },
-      url: {
-        type: [String],
+      path: {
+        type: String,
       },
     },
     discount: {
       type: Number,
+      default: 0,
     },
-    size: {
-      type: String,
-    },
+
     isFreeShip: {
       type: Boolean,
       default: false,

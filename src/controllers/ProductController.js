@@ -243,6 +243,21 @@ exports.createProduct = async (req, res) => {
   }
 };
 
+exports.updateProduct = async (req, res) => {
+  try {
+    const updateProduct = await Products.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: req.body,
+      },
+      { new: true }
+    );
+    res.status(200).json(updateProduct);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
 exports.createTestProduct = async (req, res) => {
   try {
     const product = await exampleProduct.save();
@@ -374,3 +389,54 @@ exports.getFreeProduct = async (req, res) => {
     res.status(500).json({ error: error.message });
     }
 }
+exports.getProductForEdit = async (req, res) => {
+  try {
+    const products = await Products.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(req.params.id) },
+      },
+
+      // Lookup lấy địa chỉ từ product.addressId
+      {
+        $lookup: {
+          from: "addressinfousers", // Collection của Address
+          localField: "addressId",
+          foreignField: "_id",
+          as: "addressInfo",
+        },
+      },
+      {
+        $unwind: {
+          path: "$addressInfo",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      // Lookup lấy seller từ product.sellerId
+      // {
+      //   $lookup: {
+      //     from: "infousers", // Collection của Seller
+      //     localField: "sellerId",
+      //     foreignField: "userId",
+      //     as: "sellerInfo",
+      //   },
+      // },
+      // {
+      //   $unwind: {
+      //     path: "$sellerInfo",
+      //     preserveNullAndEmptyArrays: true,
+      //   },
+      // },
+
+      // Lookup lấy địa chỉ từ addressId bên ngoài
+
+      {
+        $sort: { createdAt: -1 }, // Sắp xếp theo thời gian tạo
+      },
+    ]);
+    res.status(200).json(products[0]);
+  } catch (error) {
+    console.error("❌ Lỗi khi lấy sản phẩm:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
