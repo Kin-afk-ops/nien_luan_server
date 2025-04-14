@@ -4,19 +4,18 @@ const { getAllChildCategoriesInfo } = require("../services/categoryServices");
 const AttributeDetail = require("../models/CateAttributeDetail");
 const Category = require("../models/Category");
 
-exports.getParentCategories = (req, res) => {
+exports.getParentCategories = async(req, res) => {
   const categoryId = parseInt(req.params.id);
   if (isNaN(categoryId)) {
     return res.status(400).json({ message: "ID không hợp lệ" });
   }
 
-  let category = categoriesData.find((cat) => cat.id === categoryId);
+  let category = await Category.findOne({ id: categoryId });
   let parents = [];
   parents.unshift(category);
 
   while (category && category.parentId) {
-    category = categoriesData.find((cat) => cat.id === category.parentId);
-
+    category = await Category.findOne({ id: category.parentId });
     if (category) {
       parents.unshift(category);
     }
@@ -42,7 +41,7 @@ exports.getCategoryDataBySlug = async (req, res) => {
 exports.getListCategories = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const allChildCategories = getAllChildCategoriesInfo(id);
+    const allChildCategories = await getAllChildCategoriesInfo(id);
     return res.json(allChildCategories);
   } catch (error) {
     console.error("Lỗi khi lấy danh sách danh mục", error);

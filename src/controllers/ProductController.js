@@ -159,7 +159,7 @@ exports.getAllProductsByCategoryId = async (req, res) => {
     ];
     let hasDynamicFilters = false;
 
-    const validateCategoryIds = getAllChildCategories(categoryId);
+    const validateCategoryIds = await getAllChildCategories(categoryId);
     const filter = {
       "categories.id": { $in: validateCategoryIds },
       price: { $gte: minPrice, $lte: maxPrice },
