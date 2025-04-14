@@ -108,8 +108,8 @@ exports.addCategory = async (req, res) => {
 
 exports.getAllCategories = async (req, res) => {
   try {
-    // const categories = await categoriesData.find();
-    res.json(categoriesData);
+    const categories = await Category.find();
+    res.json(categories);
   } catch (error) {
     console.error("L��i khi lấy tất cả danh mục", error);
     return res
@@ -185,5 +185,28 @@ exports.getAttributeByCategoryId = async (req, res) => {
   }catch(error) {
     console.error("Lỗi khi lấy thông tin danh mục theo ID", error);
     return res.status(500).json({ message: "Lỗi server khi lấy thông tin danh mục", error });
+  }
+}
+
+exports.updateCategory = async (req, res) => {
+  try {
+    const categoryId = req.params.id;
+    const updatedData = req.body; // Dữ liệu cần cập nhật
+
+    // Tìm và cập nhật dựa trên categoryId
+    const updatedCategory = await Category.findOneAndUpdate(
+      { id: categoryId }, // Điều kiện tìm kiếm
+      updatedData,
+      { new: true } // Trả về dữ liệu mới sau khi cập nhật
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({ message: "Danh mục không tồn tại" });
+    }
+
+    res.json(updatedCategory);
+  } catch (error) {
+    console.error("Lỗi khi cập nhật danh mục", error);
+    return res.status(500).json({ message: "Lỗi server khi cập nhật danh mục", error });
   }
 }
