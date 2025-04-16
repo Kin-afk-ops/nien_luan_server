@@ -1,6 +1,6 @@
 const categoriesData = [
-  { id: 1, name: "Đồ cũ", slug: "category-1", parentId: null },
-  { id: 2, name: "Sách", slug: "mua-ban-sach", parentId: 1 },
+  { id: 1, name: "Đồ cũ", slug: "mua-ban-do-cu", parentId: null },
+  { id: 2, name: "Sách", slug: "mua-ban-sach", parentId: 1, attributeId: 5 },
   { id: 3, name: "Sách tiếng Việt", slug: "category-3", parentId: 2 },
   {
     id: 4,
@@ -19,9 +19,9 @@ const categoriesData = [
     parentId: 8,
     attributeId: 1003,
   },
-  { id: 10, name: "Laptop", slug: "laptop", parentId: 8, attributeId: 1002 },
+  { id: 10, name: "Laptop", slug: "laptop", parentId: 8, attributeId: 4 },
   { id: 11, name: "Máy ảnh", slug: "may-anh", parentId: 8 },
-  { id: 12, name: "Máy tính bảng", slug: "may-tinh-bang", parentId: 8 },
+  { id: 12, name: "Giày", slug: "giay-cu", parentId: 1 },
   { id: 13, name: "Đồ gia dụng", slug: "do-gia-dung", parentId: 1 },
   { id: 14, name: "Tủ lạnh", slug: "tu-lanh", parentId: 13 },
   { id: 15, name: "Máy giặt", slug: "may-giat", parentId: 13 },

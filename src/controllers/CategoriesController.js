@@ -4,19 +4,18 @@ const { getAllChildCategoriesInfo } = require("../services/categoryServices");
 const AttributeDetail = require("../models/CateAttributeDetail");
 const Category = require("../models/Category");
 
-exports.getParentCategories = (req, res) => {
+exports.getParentCategories = async(req, res) => {
   const categoryId = parseInt(req.params.id);
   if (isNaN(categoryId)) {
     return res.status(400).json({ message: "ID không hợp lệ" });
   }
 
-  let category = categoriesData.find((cat) => cat.id === categoryId);
+  let category = await Category.findOne({ id: categoryId });
   let parents = [];
   parents.unshift(category);
 
   while (category && category.parentId) {
-    category = categoriesData.find((cat) => cat.id === category.parentId);
-
+    category = await Category.findOne({ id: category.parentId });
     if (category) {
       parents.unshift(category);
     }
@@ -27,7 +26,7 @@ exports.getParentCategories = (req, res) => {
 exports.getCategoryDataBySlug = async (req, res) => {
   try {
     const categorySlug = req.params.slug;
-    const category = categoriesData.find((cat) => cat.slug === categorySlug);
+    const category = await Category.findOne({slug: categorySlug});
     if (!category)
       return res.status(404).json({ message: "Danh mục không tồn tại" });
     return res.json(category); // Trả về thông tin danh mục
@@ -35,14 +34,14 @@ exports.getCategoryDataBySlug = async (req, res) => {
     console.error("Lỗi khi lấy thông tin danh mục", e);
     return res
       .status(500)
-      .json({ message: "Lỗi server khi lấy thông tin danh mục", error });
+      .json({ message: "Lỗi server khi lấy thông tin danh mục", e });
   }
 };
 
 exports.getListCategories = async (req, res) => {
   try {
     const id = parseInt(req.params.id);
-    const allChildCategories = getAllChildCategoriesInfo(id);
+    const allChildCategories = await getAllChildCategoriesInfo(id);
     return res.json(allChildCategories);
   } catch (error) {
     console.error("Lỗi khi lấy danh sách danh mục", error);
@@ -54,24 +53,23 @@ exports.getListCategories = async (req, res) => {
 
 exports.getAttributesOfCategory = async (req, res) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = req.params.id;
+    const category = await Category.findOne({ id: id });
+    if (!category) {
+      return res.status(404).json({ message: "Không tìm thấy danh mục" });
+    }
+    const attributeList = await AttributeDetail.findOne({ attributeId: category.attributeId });
+    if (!attributeList) {
+      return res.status(404).json({ message: "Không tìm thấy thông tin thuộc tính" });
+    }
 
-    const attributeList = cateData.find({ attributeId: id });
-    if (!attributeList)
-      return res
-        .status(404)
-        .json({ message: "Không tìm thấy thông tin danh mục" });
-    return res.status(200).json(attributeList);
+    return res.json(attributeList);
   } catch (error) {
-    console.error(
-      "Lỗi khi lấy thông tin danh mục ở category controller",
-      error
-    );
-    return res
-      .status(500)
-      .json({ message: "Lỗi server khi lấy thông tin danh mục", error });
+    console.error("Lỗi khi lấy thông tin danh mục ở category controller", error);
+    return res.status(500).json({ message: "Lỗi server khi lấy thông tin danh mục", error });
   }
 };
+
 
 exports.addCategoryAttributeDetail = async (req, res) => {
   try {
@@ -109,8 +107,8 @@ exports.addCategory = async (req, res) => {
 
 exports.getAllCategories = async (req, res) => {
   try {
-    // const categories = await categoriesData.find();
-    res.json(categoriesData);
+    const categories = await Category.find();
+    res.json(categories);
   } catch (error) {
     console.error("L��i khi lấy tất cả danh mục", error);
     return res
@@ -174,3 +172,40 @@ exports.updateCategoriesAttributes = async (req, res) => {
       .json({ message: "Lỗi server khi cập nhật thông tin danh mục", error });
   }
 };
+
+exports.getAttributeByCategoryId = async (req, res) => {
+  try{
+    const categoryId = req.params.id;
+    const category = await Category.findOne({id: categoryId});
+    const attribute = await AttributeDetail.findOne({ attributeId: category.attributeId });
+    if(!attribute) return res.status(404).json({ message: "Thông tin danh mục không tồn tại" });
+    res.json(attribute);
+
+  }catch(error) {
+    console.error("Lỗi khi lấy thông tin danh mục theo ID", error);
+    return res.status(500).json({ message: "Lỗi server khi lấy thông tin danh mục", error });
+  }
+}
+
+exports.updateCategory = async (req, res) => {
+  try {
+    const categoryId = req.params.id;
+    const updatedData = req.body; // Dữ liệu cần cập nhật
+
+    // Tìm và cập nhật dựa trên categoryId
+    const updatedCategory = await Category.findOneAndUpdate(
+      { id: categoryId }, // Điều kiện tìm kiếm
+      updatedData,
+      { new: true } // Trả về dữ liệu mới sau khi cập nhật
+    );
+
+    if (!updatedCategory) {
+      return res.status(404).json({ message: "Danh mục không tồn tại" });
+    }
+
+    res.json(updatedCategory);
+  } catch (error) {
+    console.error("Lỗi khi cập nhật danh mục", error);
+    return res.status(500).json({ message: "Lỗi server khi cập nhật danh mục", error });
+  }
+}

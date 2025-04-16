@@ -1,23 +1,38 @@
 const categoriesData  = require('../models/CategoriesData');
+const Category = require("../models/Category");
 
 const categoryMap = {};
 const categoryCache = new Map(); // Lưu cache kết quả tìm danh mục con
 
 // Tạo categoryMap chỉ một lần khi server khởi động
-categoriesData.forEach(category => {
-    categoryMap[category.id] = { ...category, children: [] };
-});
+let initialized = false;
+async function initializeCategoryMap() {
+    const categoriesData = await Category.find();
+    categoryCache.clear(); // reset cache nếu reload
 
-// Xây dựng quan hệ cha - con
-categoriesData.forEach(category => {
-    if (category.parentId !== null && categoryMap[category.parentId]) {
-        categoryMap[category.parentId].children.push(categoryMap[category.id]);
-    }
-});
+    // Reset map
+    Object.keys(categoryMap).forEach(key => delete categoryMap[key]);
+
+    categoriesData.forEach(category => {
+        categoryMap[category.id] = { ...category._doc, children: [] };
+    });
+
+    categoriesData.forEach(category => {
+        if (category.parentId !== null && categoryMap[category.parentId]) {
+            categoryMap[category.parentId].children.push(categoryMap[category.id]);
+        }
+    });
+
+    initialized = true;
+}
 
 // Hàm tìm danh mục con với cache
-exports.getAllChildCategories = (id) => {
-    if (categoryCache.has(id)) return categoryCache.get(id); // Trả về từ cache nếu có
+exports.getAllChildCategories = async (id) => {
+    if (!initialized) {
+        await initializeCategoryMap();
+    }
+
+    if (categoryCache.has(id)) return categoryCache.get(id);
 
     const result = [];
     const queue = [id];
@@ -31,12 +46,15 @@ exports.getAllChildCategories = (id) => {
         }
     }
 
-    categoryCache.set(id, result); // Lưu vào cache
+    categoryCache.set(id, result);
     return result;
 };
 
-exports.getAllChildCategoriesInfo = (id) => {
-    if (!id || !categoryMap[id]) return []; // Nếu id không hợp lệ, trả về mảng rỗng
+exports.getAllChildCategoriesInfo = async (id) => {
+    if (!initialized) {
+        await initializeCategoryMap();
+    }
 
-    return categoryMap[id].children || []; // Trả về danh sách con trực tiếp
-}
+    if (!id || !categoryMap[id]) return [];
+    return categoryMap[id].children || [];
+};

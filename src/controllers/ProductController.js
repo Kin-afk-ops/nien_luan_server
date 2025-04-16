@@ -1,43 +1,42 @@
 const productsData = require("../models/ProductTest");
 const categoriesData = require("../models/CategoriesData");
 const Products = require("../models/Products");
-const { getAllChildCategories } = require("../services/categoryServices");
 const mongoose = require("mongoose");
+const { getAllChildCategories } = require("../services/categoryServices");
 
 const exampleProduct = new Products({
-  name: "Laptop HP 14s-fq1080AU",
-  sellerId: "10009",
+  name: "Nike Air Force 1",
+  sellerId: "10011",
   categories: {
-    id: 10,
-    name: "laptop",
-    slug: "laptop",
+    id: 12,
+    name: "shoes",
+    slug: "shoes",
   },
-  slug: "hp-laptop",
+  slug: "nike-air-force-1",
   condition: "new",
-  quantity: 10,
-  price: 9500000,
-  description: "Laptop HP 14s-fq1080AU",
+  quantity: 1,
+  price: 0,
+  description:
+    "Giày thể thao Nike Air Force 1 với thiết kế cổ điển, phù hợp cho mọi hoạt động.",
   details: {
-    brand: "HP",
-    ram: "4GB",
-    memory: "256TB",
-    cpu: "Intel Core i3",
-    os: "Windows",
-    battery: "5h",
-    color: "Bạc",
-    size: "14 inch",
+    brand: "Nike",
+    size: "42",
+    color: "Trắng",
+    material: "Da tổng hợp",
+    sole: "Cao su",
   },
   images: {
-    id: 1,
+    id: 2,
     url: [
-      "https://laptop360.net/wp-content/uploads/2023/02/Laptop-HP-14s-fq1080AU-2.jpg",
+      "https://static.nike.com/a/images/c_limit,w_592,f_auto/t_product_v1/69d1b8d4-b7d2-42b1-a73d-28f5e09d6e64/air-force-1-07-giay-WrLlWX.png",
     ],
   },
-  discount: 0,
+  discount: 5, // Giảm giá 5%
   isFreeShip: true,
   address: {
-    province: "Hồ Chí Minh",
+    province: "TP. Hồ Chí Minh",
   },
+  addressId: new mongoose.Types.ObjectId("6512b8d7f34b2b6a12c45679"),
 });
 
 exports.getProductBySlug = (req, res) => {
@@ -140,6 +139,8 @@ exports.getAllProductsByCategoryId = async (req, res) => {
     const skip = (page - 1) * limit; // Bỏ qua các sản phẩm đã duyệt ở trước
     const condition = req.query.conditions;
     const isFreeShip = req.query.isFreeShip;
+    const freeCost = req.query.freeCost;
+    const search = req.query.search || "";
 
     if (isNaN(categoryId)) {
       return res.status(404).json({ message: "ID danh mục không hợp lệ" });
@@ -152,10 +153,12 @@ exports.getAllProductsByCategoryId = async (req, res) => {
       "maxPrice",
       "conditions",
       "isFreeShip",
+      "freeCost",
+      "search",
     ];
     let hasDynamicFilters = false;
 
-    const validateCategoryIds = getAllChildCategories(categoryId);
+    const validateCategoryIds = await getAllChildCategories(categoryId);
     const filter = {
       "categories.id": { $in: validateCategoryIds },
       price: { $gte: minPrice, $lte: maxPrice },
@@ -163,7 +166,6 @@ exports.getAllProductsByCategoryId = async (req, res) => {
     if (condition && condition != "all") {
       filter.condition = condition;
     }
-
     Object.keys(req.query).forEach((key) => {
       if (!allowedStaticFilters.includes(key)) {
         if (typeof req.query[key] === "string") {
@@ -179,6 +181,17 @@ exports.getAllProductsByCategoryId = async (req, res) => {
 
     if (isFreeShip === "freeship") {
       filter.isFreeShip = true;
+    }
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: new RegExp(search, "i") } }, // Match product name
+        { description: { $regex: new RegExp(search, "i") } }, // Match product description
+      ];
+    }
+
+    if (freeCost === "freeCost") {
+      filter.price = 0;
     }
 
     let sortOption = { createdAt: -1 }; // Mặc định sắp xếp mới nhất
@@ -338,33 +351,40 @@ exports.getSearchProducts = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Products.find();
+    const products = await Products.aggregate([{ $sample: { size: 15 } }]);
     res.status(200).json(products);
   } catch (error) {
-    console.error("❌ Lỗi khi lấy sản phẩm:", error);
+    console.error("Lỗi khi lấy sản phẩm:", error);
     res.status(500).json({ error: error.message });
   }
 };
 
-exports.editProduct = async (req, res) => {
+exports.getOutStandingProductByCateId = async (req, res) => {
   try {
-    const productId = req.params.id;
-    const updatedProduct = await Products.findByIdAndUpdate(
-      productId,
-      { $set: req.body },
-      { new: true }
-    );
+    const cateId = parseInt(req.params.id, 10);
 
-    if (!updatedProduct) {
-      return res.status(404).json({ message: "Product not found" });
-    }
+    // Sử dụng aggregate để lấy ngẫu nhiên 15 sản phẩm
+    const products = await Products.aggregate([
+      { $match: { "categories.id": cateId } }, // Lọc sản phẩm theo categoryId
+      { $sample: { size: 15 } }, // Lấy 15 sản phẩm ngẫu nhiên
+    ]);
 
-    res.status(200).json(updatedProduct);
+    res.status(200).json(products);
   } catch (error) {
-    res.status(500).json(error);
+    console.error("Lỗi khi lấy sản phẩm ngẫu nhiên theo danh mục:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 
+exports.getFreeProduct = async (req, res) => {
+  try {
+    const products = await Products.aggregate([{ $match: { price: 0 } }]);
+    res.status(200).json(products);
+  } catch (error) {
+    console.error("L��i khi lấy sản phẩm miền phí:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
 exports.getProductForEdit = async (req, res) => {
   try {
     const products = await Products.aggregate([

@@ -25,9 +25,17 @@ const CategorySchema = mongoose.Schema({
 }, { timestamps: true });
 
 CategorySchema.pre("save", async function (next) {
+    const removeVietnameseTones = (str) => {
+        return str
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
+          .replace(/đ/g, "d")
+          .replace(/Đ/g, "D");
+      };
+      
     // Tạo slug nếu chưa có
     if (!this.slug) {
-      this.slug = slugify(this.name, { lower: true, strict: true });
+        this.slug = slugify(removeVietnameseTones(this.name), { lower: true, strict: true });
     }
   
     // Nếu chưa có id thì tạo id mới dựa trên số lượng danh mục hiện tại
