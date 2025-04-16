@@ -22,10 +22,6 @@ const OrderSchema = new mongoose.Schema(
       type: String,
     },
 
-    shippingFee: {
-      type: Number,
-      default: 0,
-    },
     totalAmount: {
       type: Number,
       required: true,

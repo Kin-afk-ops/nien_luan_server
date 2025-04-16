@@ -24,7 +24,7 @@ const ProductSchema = new mongoose.Schema(
         type: String,
       },
       parentId: {
-        type: Number,
+        type: String,
         default: null,
       },
     },
@@ -38,7 +38,6 @@ const ProductSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-
     quantity: {
       type: Number,
       required: true,
@@ -61,22 +60,14 @@ const ProductSchema = new mongoose.Schema(
       required: true,
     },
     image: {
-      publicId: {
-        type: String,
-      },
       path: {
         type: String,
       },
-    },
-    discount: {
-      type: Number,
-      default: 0,
+      publicId: {
+        type: String,
+      },
     },
 
-    isFreeShip: {
-      type: Boolean,
-      default: false,
-    },
     sold: {
       type: Boolean,
       default: false,

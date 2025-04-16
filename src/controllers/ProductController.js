@@ -346,6 +346,25 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+exports.editProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const updatedProduct = await Products.findByIdAndUpdate(
+      productId,
+      { $set: req.body },
+      { new: true }
+    );
+
+    if (!updatedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(updatedProduct);
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
+
 exports.getProductForEdit = async (req, res) => {
   try {
     const products = await Products.aggregate([
@@ -395,5 +414,20 @@ exports.getProductForEdit = async (req, res) => {
   } catch (error) {
     console.error("❌ Lỗi khi lấy sản phẩm:", error);
     res.status(500).json({ error: error.message });
+  }
+};
+
+exports.deleteProduct = async (req, res) => {
+  try {
+    const productId = req.params.id;
+    const deletedProduct = await Products.findByIdAndDelete(productId);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json({ message: "Product has been deleted successfully." });
+  } catch (error) {
+    res.status(500).json(error);
   }
 };
