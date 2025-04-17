@@ -82,10 +82,7 @@ const ProductSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    address: {
-      type: AddressInfoUser.schema,
-      required: true,
-    },
+
     approve: {
       type: Boolean,
       default: false,

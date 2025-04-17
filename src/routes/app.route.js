@@ -20,9 +20,12 @@ router.get("/products", productController.getAllProducts);
 
 router.get("/products/:id", productController.getProductById);
 router.get("/products/freeProduct/get", productController.getFreeProduct);
-router.get("/products/outstanding/:id",productController.getOutStandingProductByCateId)
+router.get(
+  "/products/outstanding/:id",
+  productController.getOutStandingProductByCateId
+);
 
-router.put("/products/:id", productController.editProduct);
+// router.put("/products/:id", productController.editProduct);
 
 router.delete("/products/:id", productController.deleteProduct);
 
