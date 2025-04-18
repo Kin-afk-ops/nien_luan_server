@@ -51,6 +51,22 @@ exports.getListCategories = async (req, res) => {
   }
 };
 
+exports.getCategoryById = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const category = await Category.findOne({id: id});
+    if(!category) {
+      return res.status(404).json({message: "Không tìm thấy danh mục"});
+    }
+    return res.json(category);
+
+  }catch(error) {
+    console.error("Lỗi khi lấy danh mục theo ID", error);
+    return res.status(500).json({ message: "Lỗi server khi lấy danh mục", error });
+  }
+
+}
+
 exports.getAttributesOfCategory = async (req, res) => {
   try {
     const id = req.params.id;
@@ -107,13 +123,13 @@ exports.addCategory = async (req, res) => {
 
 exports.getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const categories = await Category.find().collation({locale: 'vi', strength: 1}).sort({name: 1});
     res.json(categories);
   } catch (error) {
     console.error("L��i khi lấy tất cả danh mục", error);
     return res
       .status(500)
-      .json({ message: "L��i server khi lấy tất cả danh mục", error });
+      .json({ message: "Lỗi server khi lấy tất cả danh mục", error });
   }
 };
 
