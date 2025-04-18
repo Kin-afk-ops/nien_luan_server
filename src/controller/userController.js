@@ -12,7 +12,12 @@ exports.getSellerById = (req, res) => {
     res.json(seller);
 };
 
+<<<<<<< HEAD
 const createUser = (req, res) => {
+=======
+
+exports.createUser = (req, res) => {
+>>>>>>> 821f84f597cac0065b95e4238ae111291bb89572
     const newUser = req.body;
     userData.push(newUser);
     res.status(201).json(newUser);
