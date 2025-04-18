@@ -91,8 +91,41 @@ exports.updateCommentProduct = async (req, res) => {
 
 exports.deleteCommentProduct = async (req, res) => {
   try {
+    // Tìm bình luận cần xóa
+    const comment = await CommentProduct.findById(req.params.commentId);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    // Xóa bình luận
     await CommentProduct.findByIdAndDelete(req.params.commentId);
-    res.status(200).json("Comment has been deleted...");
+
+    // Tìm sản phẩm liên quan đến bình luận
+    const product = await Products.findById(comment.productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    // Lấy tất cả các bình luận còn lại của sản phẩm
+    const remainingComments = await CommentProduct.find({ productId: comment.productId });
+
+    // Tính toán lại trung bình số sao
+    const newCount = remainingComments.length;
+    const newRating = newCount > 0
+      ? remainingComments.reduce((sum, c) => sum + c.ratingStar, 0) / newCount
+      : 0;
+
+    // Cập nhật lại ratingStar của sản phẩm
+    await Products.findByIdAndUpdate(comment.productId, {
+      $set: {
+        ratingStar: {
+          count: newCount,
+          average: newRating,
+        },
+      },
+    });
+
+    res.status(200).json({ message: "Comment has been deleted and rating updated" });
   } catch (error) {
     res.status(500).json(error);
   }
