@@ -6,10 +6,6 @@ const {
   verifyTokenAnhAuthorizationUser,
 } = require("../../jwt/verifyTokenUser");
 
-router.get(
-  "/product/:sellerId",
-  verifyTokenAnhAuthorizationUser,
-  sellerController.readSellerOrder
-);
+router.get("/product/:sellerId", sellerController.readSellerOrder);
 
 module.exports = router;

@@ -1,5 +1,8 @@
 const userData = require("../models/UserDataTest");
 const Users = require("../models/Users");
+const { isMongoId } = require("../../helper/typeId");
+const admin = require("../../utils/firebaseAdmin");
+const FirebasePhoneNumber = require("../models/FirebasePhoneNumber");
 
 const getAllUsers = (req, res) => {
   res.json(userData);
@@ -47,13 +50,29 @@ exports.createUser = (req, res) => {
 exports.getUserById = async (req, res) => {
   try {
     const userId = req.params.id;
-    const user = await Users.findById(userId);
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (isMongoId(userId)) {
+      const user = await Users.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      return res.status(200).json(user);
+    } else {
+      const user = await admin.auth().getUser(userId);
+      const email = user.email;
+      const userPhone = await FirebasePhoneNumber.findOne({ userId: userId });
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      return res.status(200).json({
+        email: email,
+        phone: userPhone.phone,
+      });
     }
-
-    res.status(200).json(user);
   } catch (error) {
     res.status(500).json(error);
   }

@@ -167,7 +167,7 @@ exports.registerUserEmail = async (req, res) => {
 exports.loginUserPhone = async (req, res) => {
   try {
     const user = await Users.findOne({ phone: req.body.phone });
-    !user && res.status(401).json("Wrong credential");
+    if (!user) return res.status(401).json("Wrong credential");
 
     const isPasswordValid = await comparePassword(
       req.body.password,
@@ -194,7 +194,7 @@ exports.loginUserPhone = async (req, res) => {
 exports.loginUserEmail = async (req, res) => {
   try {
     const user = await Users.findOne({ email: req.body.email });
-    if(!user) return res.status(401).json("Wrong credential");
+    if (!user) return res.status(401).json("Wrong credential");
 
     const isPasswordValid = await comparePassword(
       req.body.password,
