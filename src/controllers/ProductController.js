@@ -64,10 +64,36 @@ exports.getProductById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const product = await Products.findById(id).lean();
+    const product = await Products.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) }, // Tìm sản phẩm theo ID
+      },
+      {
+        $lookup: {
+          from: "infousers", // Tên collection của InfoUser trong MongoDB (chữ thường, số nhiều)
+          localField: "sellerId",
+          foreignField: "userId",
+          as: "sellerInfo",
+        },
+      },
+      {
+        $unwind: "$sellerInfo", // Giải nén nếu chỉ có một kết quả
+      },
+      {
+        $lookup: {
+          from: "addressinfousers", // Tên collection của AddressInfoUser (chữ thường, số nhiều)
+          localField: "addressId",
+          foreignField: "_id",
+          as: "addressInfo",
+        },
+      },
+      {
+        $unwind: "$addressInfo", // Giải nén địa chỉ (nếu có)
+      }
+    ]);
     if (!product)
       return res.status(404).json({ message: "Sản phẩm không tồn tại" });
-    res.json(product);
+    res.json(product[0]); // Trả về sản phẩm đầu tiên (vì chúng ta đã tìm theo ID)
   } catch (error) {
     console.error("Lỗi khi lấy sản phẩm", error);
     return res.status(500).json({ message: "Lỗi server", error });
@@ -351,7 +377,31 @@ exports.getSearchProducts = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const products = await Products.aggregate([{ $sample: { size: 15 } }]);
+    const products = await Products.aggregate([
+      { $sample: { size: 15 } }, // Lấy 15 sản phẩm ngẫu nhiên
+      {
+        $lookup: {
+          from: "infousers", // Tên collection của InfoUser trong MongoDB (chữ thường, số nhiều)
+          localField: "sellerId",
+          foreignField: "userId",
+          as: "sellerInfo",
+        },
+      },
+      {
+        $unwind: "$sellerInfo", // Giải nén nếu chỉ có một kết quả
+      },
+      {
+        $lookup: {
+          from: "addressinfousers", // Tên collection của AddressInfoUser (chữ thường, số nhiều)
+          localField: "addressId",
+          foreignField: "_id",
+          as: "addressInfo",
+        },
+      },
+      {
+        $unwind: "$addressInfo", // Giải nén địa chỉ (nếu có)
+      },
+    ]);
     res.status(200).json(products);
   } catch (error) {
     console.error("Lỗi khi lấy sản phẩm:", error);
@@ -367,6 +417,28 @@ exports.getOutStandingProductByCateId = async (req, res) => {
     const products = await Products.aggregate([
       { $match: { "categories.id": cateId } }, // Lọc sản phẩm theo categoryId
       { $sample: { size: 15 } }, // Lấy 15 sản phẩm ngẫu nhiên
+      {
+        $lookup: {
+          from: "infousers", // Tên collection của InfoUser trong MongoDB (chữ thường, số nhiều)
+          localField: "sellerId",
+          foreignField: "userId",
+          as: "sellerInfo",
+        },
+      },
+      {
+        $unwind: "$sellerInfo", // Giải nén nếu chỉ có một kết quả
+      },
+      {
+        $lookup: {
+          from: "addressinfousers", // Tên collection của AddressInfoUser (chữ thường, số nhiều)
+          localField: "addressId",
+          foreignField: "_id",
+          as: "addressInfo",
+        },
+      },
+      {
+        $unwind: "$addressInfo", // Giải nén địa chỉ (nếu có)
+      },
     ]);
 
     res.status(200).json(products);
