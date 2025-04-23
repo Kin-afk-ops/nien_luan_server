@@ -89,7 +89,7 @@ exports.getProductById = async (req, res) => {
       },
       {
         $unwind: "$addressInfo", // Giải nén địa chỉ (nếu có)
-      }
+      },
     ]);
     if (!product)
       return res.status(404).json({ message: "Sản phẩm không tồn tại" });
@@ -147,8 +147,8 @@ exports.getDifferentProductsById = async (req, res) => {
       },
       {
         $unwind: "$addressInfo", // Giải nén địa chỉ (nếu có)
-      }
-    ])
+      },
+    ]);
     if (fillerdProducts.length === 0) {
       return res.status(404).json({ message: "Không tìm thấy sản phẩm nào" });
     }
@@ -189,8 +189,8 @@ exports.getSimilarProductById = async (req, res) => {
       },
       {
         $unwind: "$addressInfo", // Giải nén địa chỉ (nếu có)
-      }
-    ])
+      },
+    ]);
     return res.json(filteredProducts); // Trả về 4 sản phẩm ng��u nhiên của người bán
   } catch (error) {
     console.error("Lỗi khi lấy sản phẩm tương tự", error);
@@ -229,6 +229,7 @@ exports.getAllProductsByCategoryId = async (req, res) => {
       "isFreeShip",
       "freeCost",
       "search",
+      "approve",
     ];
     let hasDynamicFilters = false;
 
@@ -237,6 +238,11 @@ exports.getAllProductsByCategoryId = async (req, res) => {
       "categories.id": { $in: validateCategoryIds },
       price: { $gte: minPrice, $lte: maxPrice },
     };
+    if (req.query.approve !== undefined) {
+      // Chuyển đổi từ string sang boolean
+      filter.approve = req.query.approve === "true";
+    }
+
     if (condition && condition != "all") {
       filter.condition = condition;
     }
@@ -273,17 +279,21 @@ exports.getAllProductsByCategoryId = async (req, res) => {
     if (sort === "price_desc") sortOption = { price: -1 };
     if (sort === "free") filter.price = 0;
 
+    // Nếu có approve trong query → lọc theo approve true/false
+
     const products = await Products.aggregate([
       { $match: filter }, // Lọc sản phẩm theo điều kiện
-      {$lookup: {
-        from: "addressinfousers",
-        localField: "addressId",
-        foreignField: "_id",
-        as: "addressInfo",
-      }},
       {
-        $unwind: "$addressInfo"
-      }
+        $lookup: {
+          from: "addressinfousers",
+          localField: "addressId",
+          foreignField: "_id",
+          as: "addressInfo",
+        },
+      },
+      {
+        $unwind: "$addressInfo",
+      },
     ])
       .sort(sortOption)
       .skip(skip)
@@ -352,9 +362,16 @@ exports.createTestProduct = async (req, res) => {
 
 exports.getProductBySellerId = async (req, res) => {
   try {
+    const matchStage = { sellerId: req.params.id };
+
+    // Nếu có approve trong query → lọc theo approve true/false
+    if (req.query.approve !== undefined) {
+      matchStage.approve = req.query.approve === "true";
+    }
+
     const product = await Products.aggregate([
       {
-        $match: { sellerId: req.params.id }, // Lọc theo sellerId
+        $match: matchStage, // Lọc theo sellerId
       },
       {
         $lookup: {
@@ -436,8 +453,17 @@ exports.getSearchProducts = async (req, res) => {
 
 exports.getAllProducts = async (req, res) => {
   try {
+    const matchStage = {};
+
+    // Nếu có approve trong query → lọc theo approve true/false
+    if (req.query.approve !== undefined) {
+      matchStage.approve = req.query.approve === "true";
+    }
+
     const products = await Products.aggregate([
+      { $match: matchStage },
       { $sample: { size: 15 } }, // Lấy 15 sản phẩm ngẫu nhiên
+
       {
         $lookup: {
           from: "infousers", // Tên collection của InfoUser trong MongoDB (chữ thường, số nhiều)
@@ -470,11 +496,18 @@ exports.getAllProducts = async (req, res) => {
 
 exports.getOutStandingProductByCateId = async (req, res) => {
   try {
+    const matchStage = {};
+
+    // Nếu có approve trong query → lọc theo approve true/false
+    if (req.query.approve !== undefined) {
+      matchStage.approve = req.query.approve === "true";
+    }
+
     const cateId = parseInt(req.params.id, 10);
 
     // Sử dụng aggregate để lấy ngẫu nhiên 15 sản phẩm
     const products = await Products.aggregate([
-      { $match: { "categories.id": cateId } }, // Lọc sản phẩm theo categoryId
+      { $match: { "categories.id": cateId, approve: true } }, // Lọc sản phẩm theo categoryId
       { $sample: { size: 15 } }, // Lấy 15 sản phẩm ngẫu nhiên
       {
         $lookup: {
@@ -509,7 +542,9 @@ exports.getOutStandingProductByCateId = async (req, res) => {
 
 exports.getFreeProduct = async (req, res) => {
   try {
-    const products = await Products.aggregate([{ $match: { price: 0 } }]);
+    const products = await Products.aggregate([
+      { $match: { price: 0, approve: true } },
+    ]);
     res.status(200).json(products);
   } catch (error) {
     console.error("L��i khi lấy sản phẩm miền phí:", error);

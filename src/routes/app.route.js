@@ -19,6 +19,7 @@ const fileUploader = require("../../config/cloudinary");
 router.get("/products", productController.getAllProducts);
 
 router.get("/products/:id", productController.getProductById);
+router.post("/products/:id", productController.createProduct);
 router.get("/products/freeProduct/get", productController.getFreeProduct);
 router.get(
   "/products/outstanding/:id",
