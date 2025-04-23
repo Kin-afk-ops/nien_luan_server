@@ -3,6 +3,7 @@ const cateData = require("../models/CateAttributeDetail");
 const { getAllChildCategoriesInfo } = require("../services/categoryServices");
 const AttributeDetail = require("../models/CateAttributeDetail");
 const Category = require("../models/Category");
+const Products = require("../models/Products");
 
 exports.getParentCategories = async(req, res) => {
   const categoryId = parseInt(req.params.id);
@@ -223,5 +224,28 @@ exports.updateCategory = async (req, res) => {
   } catch (error) {
     console.error("Lỗi khi cập nhật danh mục", error);
     return res.status(500).json({ message: "Lỗi server khi cập nhật danh mục", error });
+  }
+}
+
+exports.deleteCategory = async (req, res) => {
+  try {
+    const categoryId = req.params.id;
+    const deletedCategory = await Category.findOneAndDelete({ id: categoryId });
+    if(!deletedCategory) {
+      return res.status(404).json({ message: "Danh mục không tồn tại" });
+    }
+
+    await Products.updateMany(
+      {categoryId: categoryId}, // Điều kiện tìm kiếm
+      { $set: { categoryId: 1 } } // Cập nhật trường categoryId thành null
+    )
+    await Category.updateMany (
+      { parentId: categoryId }, // Điều kiện tìm kiếm
+      { $set: { parentId: 1 } } // Cập nhật trường parentId thành null
+    )
+    res.json({ message: "Xóa danh mục thành công, đã cập nhật sản phẩm và các danh mục con", deletedCategory });
+  }catch(error) {
+    console.error("Lỗi khi xóa danh mục", error);
+    return res.status(500).json({ message: "Lỗi server khi xóa danh mục", error });
   }
 }

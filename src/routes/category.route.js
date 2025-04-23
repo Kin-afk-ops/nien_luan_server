@@ -10,5 +10,6 @@ router.post("/addAttr",CategoriesController.addCategoryAttributeDetail);
 router.put("/updateAttr/:attributeId",CategoriesController.updateCategoriesAttributes);
 router.get("/getAttrByCateId/:id",CategoriesController.getAttributeByCategoryId);
 router.put("/updateCate/:id",CategoriesController.updateCategory);
+router.delete("/deleteCate/:id",CategoriesController.deleteCategory);
 
 module.exports = router;

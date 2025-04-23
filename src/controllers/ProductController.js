@@ -119,7 +119,36 @@ exports.getProductById = async (req, res) => {
 exports.getDifferentProductsById = async (req, res) => {
   try {
     const sellerId = req.params.sellerId;
-    const fillerdProducts = await Products.find({ sellerId });
+    const fillerdProducts = await Products.aggregate([
+      {
+        $match: { sellerId: sellerId }, // Lọc sản phẩm theo sellerId
+      },
+      {
+        $sample: { size: 4 }, // Lấy 4 sản phẩm ngẫu nhiên
+      },
+      {
+        $lookup: {
+          from: "infousers", // Tên collection của InfoUser trong MongoDB (chữ thường, số nhiều)
+          localField: "sellerId",
+          foreignField: "userId",
+          as: "sellerInfo",
+        },
+      },
+      {
+        $unwind: "$sellerInfo", // Giải nén nếu chỉ có một kết quả
+      },
+      {
+        $lookup: {
+          from: "addressinfousers", // Tên collection của AddressInfoUser (chữ thường, số nhiều)
+          localField: "addressId",
+          foreignField: "_id",
+          as: "addressInfo",
+        },
+      },
+      {
+        $unwind: "$addressInfo", // Giải nén địa chỉ (nếu có)
+      }
+    ])
     if (fillerdProducts.length === 0) {
       return res.status(404).json({ message: "Không tìm thấy sản phẩm nào" });
     }
@@ -136,14 +165,33 @@ exports.getDifferentProductsById = async (req, res) => {
 exports.getSimilarProductById = async (req, res) => {
   try {
     const categoryId = parseInt(req.params.id, 10);
-    const filteredProducts = await Products.find({
-      "categories.id": categoryId,
-    });
+    // const filteredProducts = await Products.find({
+    //   "categories.id": categoryId,
+    // });
 
-    const randomProducts = filteredProducts
-      .sort(() => Math.random() - 0.5) // Trộn mảng ngẫu nhiên
-      .slice(0, 4); // Lấy 4 phần tử đầu tiên
-    return res.json(randomProducts); // Trả về 4 sản phẩm ng��u nhiên của người bán
+    // const randomProducts = filteredProducts
+    //   .sort(() => Math.random() - 0.5) // Trộn mảng ngẫu nhiên
+    //   .slice(0, 4); // Lấy 4 phần tử đầu tiên
+    const filteredProducts = await Products.aggregate([
+      {
+        $match: { "categories.id": categoryId }, // Lọc sản phẩm theo categoryId
+      },
+      {
+        $sample: { size: 4 }, // Lấy 4 sản phẩm ngẫu nhiên
+      },
+      {
+        $lookup: {
+          from: "addressinfousers", // Tên collection của AddressInfoUser (chữ thường, số nhiều)
+          localField: "addressId",
+          foreignField: "_id",
+          as: "addressInfo",
+        },
+      },
+      {
+        $unwind: "$addressInfo", // Giải nén địa chỉ (nếu có)
+      }
+    ])
+    return res.json(filteredProducts); // Trả về 4 sản phẩm ng��u nhiên của người bán
   } catch (error) {
     console.error("Lỗi khi lấy sản phẩm tương tự", error);
     return res
@@ -225,7 +273,18 @@ exports.getAllProductsByCategoryId = async (req, res) => {
     if (sort === "price_desc") sortOption = { price: -1 };
     if (sort === "free") filter.price = 0;
 
-    const products = await Products.find(filter)
+    const products = await Products.aggregate([
+      { $match: filter }, // Lọc sản phẩm theo điều kiện
+      {$lookup: {
+        from: "addressinfousers",
+        localField: "addressId",
+        foreignField: "_id",
+        as: "addressInfo",
+      }},
+      {
+        $unwind: "$addressInfo"
+      }
+    ])
       .sort(sortOption)
       .skip(skip)
       .limit(limit);
