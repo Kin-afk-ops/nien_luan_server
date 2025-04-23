@@ -88,11 +88,7 @@ router.put(
   authController.updatePassword
 );
 
-router.get(
-  "/auth/firebase/phone/:id",
-  verifyTokenAnhAuthorizationUser,
-  authController.getFirebasePhone
-);
+router.get("/auth/firebase/phone/:id", authController.getFirebasePhone);
 
 router.delete("/auth/firebase/phone/", authController.deleteFirebasePhone);
 

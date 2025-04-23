@@ -4,21 +4,14 @@ const Cart = require("../models/Cart");
 
 exports.createOrder = async (req, res) => {
   try {
-    const newOrder = req.body.map((order) => ({
-      buyerId: req.params.userId, // Gán userId cho tất cả đơn hàng
-      ...order,
-    }));
+    const newOrder = await Order({
+      buyerId: req.params.userId,
+      ...req.body,
+    });
 
-    const savedOrders = await Order.insertMany(newOrder);
+    const savedOrders = await newOrder.save();
 
-    const populatedOrders = await Order.find({
-      _id: { $in: savedOrders.map((o) => o._id) },
-    })
-      .populate("productId")
-      .populate("addressId")
-      .exec();
-
-    res.status(200).json(populatedOrders);
+    res.status(200).json(savedOrders);
   } catch (error) {
     res.status(500).json(error);
   }

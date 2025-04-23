@@ -5,7 +5,7 @@ const AttributeDetail = require("../models/CateAttributeDetail");
 const Category = require("../models/Category");
 const Products = require("../models/Products");
 
-exports.getParentCategories = async(req, res) => {
+exports.getParentCategories = async (req, res) => {
   const categoryId = parseInt(req.params.id);
   if (isNaN(categoryId)) {
     return res.status(400).json({ message: "ID không hợp lệ" });
@@ -27,7 +27,7 @@ exports.getParentCategories = async(req, res) => {
 exports.getCategoryDataBySlug = async (req, res) => {
   try {
     const categorySlug = req.params.slug;
-    const category = await Category.findOne({slug: categorySlug});
+    const category = await Category.findOne({ slug: categorySlug });
     if (!category)
       return res.status(404).json({ message: "Danh mục không tồn tại" });
     return res.json(category); // Trả về thông tin danh mục
@@ -55,18 +55,18 @@ exports.getListCategories = async (req, res) => {
 exports.getCategoryById = async (req, res) => {
   try {
     const id = req.params.id;
-    const category = await Category.findOne({id: id});
-    if(!category) {
-      return res.status(404).json({message: "Không tìm thấy danh mục"});
+    const category = await Category.findOne({ id: id });
+    if (!category) {
+      return res.status(404).json({ message: "Không tìm thấy danh mục" });
     }
     return res.json(category);
-
-  }catch(error) {
+  } catch (error) {
     console.error("Lỗi khi lấy danh mục theo ID", error);
-    return res.status(500).json({ message: "Lỗi server khi lấy danh mục", error });
+    return res
+      .status(500)
+      .json({ message: "Lỗi server khi lấy danh mục", error });
   }
-
-}
+};
 
 exports.getAttributesOfCategory = async (req, res) => {
   try {
@@ -75,18 +75,26 @@ exports.getAttributesOfCategory = async (req, res) => {
     if (!category) {
       return res.status(404).json({ message: "Không tìm thấy danh mục" });
     }
-    const attributeList = await AttributeDetail.findOne({ attributeId: category.attributeId });
+    const attributeList = await AttributeDetail.findOne({
+      attributeId: category.attributeId,
+    });
     if (!attributeList) {
-      return res.status(404).json({ message: "Không tìm thấy thông tin thuộc tính" });
+      return res
+        .status(404)
+        .json({ message: "Không tìm thấy thông tin thuộc tính" });
     }
 
     return res.json(attributeList);
   } catch (error) {
-    console.error("Lỗi khi lấy thông tin danh mục ở category controller", error);
-    return res.status(500).json({ message: "Lỗi server khi lấy thông tin danh mục", error });
+    console.error(
+      "Lỗi khi lấy thông tin danh mục ở category controller",
+      error
+    );
+    return res
+      .status(500)
+      .json({ message: "Lỗi server khi lấy thông tin danh mục", error });
   }
 };
-
 
 exports.addCategoryAttributeDetail = async (req, res) => {
   try {
@@ -124,7 +132,9 @@ exports.addCategory = async (req, res) => {
 
 exports.getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find().collation({locale: 'vi', strength: 1}).sort({name: 1});
+    const categories = await Category.find()
+      .collation({ locale: "vi", strength: 1 })
+      .sort({ name: 1 });
     res.json(categories);
   } catch (error) {
     console.error("L��i khi lấy tất cả danh mục", error);
@@ -191,18 +201,24 @@ exports.updateCategoriesAttributes = async (req, res) => {
 };
 
 exports.getAttributeByCategoryId = async (req, res) => {
-  try{
-    const categoryId = req.params.id;
-    const category = await Category.findOne({id: categoryId});
-    const attribute = await AttributeDetail.findOne({ attributeId: category.attributeId });
-    if(!attribute) return res.status(404).json({ message: "Thông tin danh mục không tồn tại" });
-    res.json(attribute);
-
-  }catch(error) {
+  try {
+    const categoryId = parseInt(req.params.id);
+    const category = await Category.findOne({ id: categoryId });
+    const attribute = await AttributeDetail.findOne({
+      attributeId: category.attributeId,
+    });
+    if (!attribute)
+      return res
+        .status(404)
+        .json({ message: "Thông tin danh mục không tồn tại" });
+    return res.status(200).json(attribute);
+  } catch (error) {
     console.error("Lỗi khi lấy thông tin danh mục theo ID", error);
-    return res.status(500).json({ message: "Lỗi server khi lấy thông tin danh mục", error });
+    return res
+      .status(500)
+      .json({ message: "Lỗi server khi lấy thông tin danh mục", error });
   }
-}
+};
 
 exports.updateCategory = async (req, res) => {
   try {
@@ -223,29 +239,37 @@ exports.updateCategory = async (req, res) => {
     res.json(updatedCategory);
   } catch (error) {
     console.error("Lỗi khi cập nhật danh mục", error);
-    return res.status(500).json({ message: "Lỗi server khi cập nhật danh mục", error });
+    return res
+      .status(500)
+      .json({ message: "Lỗi server khi cập nhật danh mục", error });
   }
-}
+};
 
 exports.deleteCategory = async (req, res) => {
   try {
     const categoryId = req.params.id;
     const deletedCategory = await Category.findOneAndDelete({ id: categoryId });
-    if(!deletedCategory) {
+    if (!deletedCategory) {
       return res.status(404).json({ message: "Danh mục không tồn tại" });
     }
 
     await Products.updateMany(
-      {categoryId: categoryId}, // Điều kiện tìm kiếm
+      { categoryId: categoryId }, // Điều kiện tìm kiếm
       { $set: { categoryId: 1 } } // Cập nhật trường categoryId thành null
-    )
-    await Category.updateMany (
+    );
+    await Category.updateMany(
       { parentId: categoryId }, // Điều kiện tìm kiếm
       { $set: { parentId: 1 } } // Cập nhật trường parentId thành null
-    )
-    res.json({ message: "Xóa danh mục thành công, đã cập nhật sản phẩm và các danh mục con", deletedCategory });
-  }catch(error) {
+    );
+    res.json({
+      message:
+        "Xóa danh mục thành công, đã cập nhật sản phẩm và các danh mục con",
+      deletedCategory,
+    });
+  } catch (error) {
     console.error("Lỗi khi xóa danh mục", error);
-    return res.status(500).json({ message: "Lỗi server khi xóa danh mục", error });
+    return res
+      .status(500)
+      .json({ message: "Lỗi server khi xóa danh mục", error });
   }
-}
+};
